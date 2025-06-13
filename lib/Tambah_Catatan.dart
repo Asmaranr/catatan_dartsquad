@@ -1,6 +1,9 @@
-import 'dart:io';
+import 'dart:io' as io;
+import 'dart:typed_data';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:catatan_dartsquad/Dashboard.dart';
 
 class TambahCatatan extends StatefulWidget {
   const TambahCatatan({super.key});
@@ -10,81 +13,132 @@ class TambahCatatan extends StatefulWidget {
 }
 
 class _TambahCatatanState extends State<TambahCatatan> {
-  final List<Widget> _contentList = [];
-  final TextEditingController _textController = TextEditingController();
+  final TextEditingController _judulController = TextEditingController();
+  final TextEditingController _isiController = TextEditingController();
+  io.File? _selectedImageFile;
+  Uint8List? _selectedImageBytes;
   final ImagePicker _picker = ImagePicker();
 
-  void _addText() {
-    if (_textController.text.trim().isEmpty) return;
-    setState(() {
-      _contentList.add(
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8),
-          child: Text(_textController.text),
-        ),
-      );
-      _textController.clear();
-    });
-  }
-
-  Future<void> _addImage() async {
+  Future<void> _pickImage() async {
     final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
     if (pickedFile != null) {
-      setState(() {
-        _contentList.add(
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8),
-            child: Image.file(File(pickedFile.path)),
-          ),
-        );
-      });
+      if (kIsWeb) {
+        final bytes = await pickedFile.readAsBytes();
+        setState(() {
+          _selectedImageBytes = bytes;
+        });
+      } else {
+        setState(() {
+          _selectedImageFile = io.File(pickedFile.path);
+        });
+      }
     }
-  }
-
-  void _saveNote() {
-    // Di sini kamu bisa simpan isi catatan (_contentList) ke database atau file
-    print("Catatan disimpan");
   }
 
   @override
   Widget build(BuildContext context) {
+    Widget? imageWidget;
+    if (kIsWeb && _selectedImageBytes != null) {
+      imageWidget = Image.memory(_selectedImageBytes!, fit: BoxFit.cover);
+    } else if (!kIsWeb && _selectedImageFile != null) {
+      imageWidget = Image.file(_selectedImageFile!, fit: BoxFit.cover);
+    }
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Tambah Catatan"),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
+        title: const Text(""),
         actions: [
-          IconButton(onPressed: _saveNote, icon: const Icon(Icons.save)),
+          TextButton(
+            onPressed: () {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => const Dashboard()),
+              );
+            },
+            child: const Text(
+              "SIMPAN",
+              style: TextStyle(color: Colors.black),
+            ),
+          ),
         ],
+        backgroundColor: Colors.transparent,
+        elevation: 0,
       ),
-      body: Column(
-        children: [
-          Expanded(
-            child: ListView(
-              padding: const EdgeInsets.all(16),
-              children: _contentList,
+      body: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            TextField(
+              controller: _judulController,
+              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              decoration: const InputDecoration(
+                hintText: "Judul",
+                border: InputBorder.none,
+              ),
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: _textController,
-                    decoration: const InputDecoration(hintText: "Tulis sesuatu..."),
+            const SizedBox(height: 20),
+            TextField(
+              controller: _isiController,
+              maxLines: null,
+              decoration: const InputDecoration(
+                hintText: "Tulis lebih banyak di sini...",
+                border: InputBorder.none,
+              ),
+            ),
+            const SizedBox(height: 20),
+            if (imageWidget != null)
+              Stack(
+                children: [
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: SizedBox(
+                      height: 250,
+                      width: double.infinity,
+                      child: imageWidget,
+                    ),
                   ),
-                ),
-                IconButton(
-                  icon: const Icon(Icons.send),
-                  onPressed: _addText,
-                ),
-                IconButton(
-                  icon: const Icon(Icons.image),
-                  onPressed: _addImage,
-                ),
-              ],
+                  Positioned(
+                    top: 8,
+                    right: 8,
+                    child: GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          _selectedImageFile = null;
+                          _selectedImageBytes = null;
+                        });
+                      },
+                      child: Container(
+                        decoration: const BoxDecoration(
+                          color: Colors.black54,
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Padding(
+                          padding: EdgeInsets.all(4.0),
+                          child: Icon(Icons.close, color: Colors.white, size: 20),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            const Spacer(),
+            Align(
+              alignment: Alignment.bottomRight,
+              child: IconButton(
+                icon: const Icon(Icons.add_photo_alternate),
+                iconSize: 30,
+                onPressed: _pickImage,
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
