@@ -1,10 +1,12 @@
 import 'package:catatan_dartsquad/dashboard.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
+import 'package:get/get.dart';
+import 'package:catatan_dartsquad/Tambah_Catatan.dart';
+import 'package:image_picker/image_picker.dart';
 
 void main() async {
-  await GetStorage.init(); // Inisialisasi penyimpanan lokal
+  await GetStorage.init();
   runApp(const MyApp());
 }
 
@@ -13,16 +15,16 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final box = GetStorage();
-    final bool isDark = box.read('temaGelap') ?? false;
-
     return GetMaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Aplikasi Catatan',
-      theme: ThemeData.light(useMaterial3: true),
-      darkTheme: ThemeData.dark(useMaterial3: true),
-      themeMode: isDark ? ThemeMode.dark : ThemeMode.light,
-      home: const Dashboard(),
+      title: 'Flutter Demo',
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: const Color.fromARGB(255, 197, 144, 30),
+        ),
+        useMaterial3: true,
+      ),
+      home: const TambahCatatan(),
     );
   }
 }
