@@ -1,23 +1,28 @@
-import 'package:catatan_dartsquad/Login.dart';
+import 'package:catatan_dartsquad/dashboard.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
 
-void main() {
+void main() async {
+  await GetStorage.init(); // Inisialisasi penyimpanan lokal
   runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
-      ),
-      home: Login(),
+    final box = GetStorage();
+    final bool isDark = box.read('temaGelap') ?? false;
+
+    return GetMaterialApp(
+      debugShowCheckedModeBanner: false,
+      title: 'Aplikasi Catatan',
+      theme: ThemeData.light(useMaterial3: true),
+      darkTheme: ThemeData.dark(useMaterial3: true),
+      themeMode: isDark ? ThemeMode.dark : ThemeMode.light,
+      home: const Dashboard(),
     );
   }
 }
