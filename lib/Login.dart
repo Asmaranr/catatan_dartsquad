@@ -12,7 +12,7 @@ class _LoginState extends State<Login> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
 
-  final box = GetStorage(); // GetStorage instance
+  final box = GetStorage(); 
   bool _obscurePassword = true;
 
   void _navigateToRegister() {
@@ -33,7 +33,6 @@ class _LoginState extends State<Login> {
     String savedPassword = box.read('password') ?? '';
 
     if (inputEmail == savedEmail && inputPassword == savedPassword) {
-      // Login berhasil
       showDialog(
         context: context,
         builder: (_) => AlertDialog(
@@ -46,27 +45,7 @@ class _LoginState extends State<Login> {
 
                 final box = GetStorage();
                 box.write('sudah_login', true);
-                Navigator.pushNamed(context, '/dashboard'); // atau Get.to(...)
-              },
-              child: const Text('OKE'),
-            ),
-          ],
-        ),
-      );
-    }
-
-    if (inputEmail == savedEmail && inputPassword == savedPassword) {
-      // Login berhasil
-      showDialog(
-        context: context,
-        builder: (_) => AlertDialog(
-          title: const Text('Login Berhasil'),
-          content: const Text('Selamat, Anda berhasil login!'),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-                // Navigasi ke halaman lain jika perlu
+                Navigator.pushNamed(context, '/dashboard'); 
               },
               child: const Text('OKE'),
             ),
@@ -202,7 +181,7 @@ class _LoginState extends State<Login> {
                       borderRadius: BorderRadius.circular(15),
                     ),
                   ),
-                  onPressed: _login, // <- FIXED: tombol login memanggil _login
+                  onPressed: _login, 
                   child: const Text(
                     'LOGIN',
                     style: TextStyle(
