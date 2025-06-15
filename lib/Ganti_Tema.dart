@@ -16,14 +16,12 @@ class _GantiTemaState extends State<GantiTema> {
 
   void setTema(bool isGelap) {
     box.write('temaGelap', isGelap);
-    Get.forceAppUpdate(); // Memaksa update tema secara global
-    setState(() {}); // Perbarui tampilan halaman ini
+    Get.forceAppUpdate(); 
+    setState(() {}); 
   }
 
   @override
   Widget build(BuildContext context) {
-    print("Tema Gelap aktif: $temaGelap"); // Debugging
-
     return Scaffold(
       backgroundColor: temaGelap ? Colors.black : Colors.white,
       appBar: AppBar(
@@ -53,55 +51,78 @@ class _GantiTemaState extends State<GantiTema> {
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 // Tema Terang
-                GestureDetector(
-                  onTap: () => setTema(false),
-                  child: Column(
-                    children: [
-                      Container(
-                        width: 100,
-                        height: 100,
-                        color: Colors.grey[300],
-                        child: const Center(
-                          child: Icon(Icons.wb_sunny,
-                              size: 40, color: Colors.black),
+                Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(12),
+                    onTap: () => setTema(false),
+                    child: Column(
+                      children: [
+                        Container(
+                          width: 100,
+                          height: 100,
+                          decoration: BoxDecoration(
+                            color: Colors.grey[300],
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: !temaGelap ? Colors.amber : Colors.transparent,
+                              width: 3,
+                            ),
+                          ),
+                          child: const Center(
+                            child: Icon(Icons.wb_sunny,
+                                size: 40, color: Colors.black),
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        'Tema Terang',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                          color: temaGelap ? Colors.white : Colors.black,
+                        const SizedBox(height: 8),
+                        Text(
+                          'Tema Terang',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                            color: temaGelap ? Colors.white : Colors.black,
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
+
                 // Tema Gelap
-                GestureDetector(
-                  onTap: () => setTema(true),
-                  child: Column(
-                    children: [
-                      Container(
-                        width: 100,
-                        height: 100,
-                        color: Colors.grey[700],
-                        child: const Center(
-                          child: Icon(Icons.nightlight_round,
-                              size: 40, color: Colors.white),
+                Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(12),
+                    onTap: () => setTema(true),
+                    child: Column(
+                      children: [
+                        Container(
+                          width: 100,
+                          height: 100,
+                          decoration: BoxDecoration(
+                            color: Colors.grey[700],
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: temaGelap ? Colors.amber : Colors.transparent,
+                              width: 3,
+                            ),
+                          ),
+                          child: const Center(
+                            child: Icon(Icons.nightlight_round,
+                                size: 40, color: Colors.white),
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        'Tema Gelap',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                          color: temaGelap ? Colors.white : Colors.black,
+                        const SizedBox(height: 8),
+                        Text(
+                          'Tema Gelap',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                            color: temaGelap ? Colors.white : Colors.black,
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ],

@@ -4,7 +4,7 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:catatan_dartsquad/SplashScreen.dart';
-import 'edit.dart';
+import 'package:catatan_dartsquad/Edit.dart';
 
 class Profil extends StatefulWidget {
   const Profil({super.key});
@@ -212,7 +212,6 @@ class _ProfilState extends State<Profil> {
               borderRadius: BorderRadius.circular(25),
               borderSide: BorderSide.none,
             ),
-            prefixIcon: Icon(Icons.lock, color: textColor),
             suffixIcon: IconButton(
               icon: Icon(
                 isVisible ? Icons.visibility : Icons.visibility_off,
