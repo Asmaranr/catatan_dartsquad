@@ -1,8 +1,10 @@
-import 'dart:io';
-
+import 'dart:typed_data';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:image_picker/image_picker.dart';
+// hanya digunakan untuk non-web
+import 'dart:io' as io;
 
 class Edit extends StatefulWidget {
   final String nama;
@@ -25,8 +27,12 @@ class Edit extends StatefulWidget {
 class _EditState extends State<Edit> {
   final box = GetStorage();
   final picker = ImagePicker();
-  File? _gambarProfil;
+
+  Uint8List? _webImage;
+  String? _gambarPath;
+
   final String keyFoto = 'pathFotoProfil';
+  final String keyWebFoto = 'webFotoProfil';
 
   late TextEditingController _namaController;
   late TextEditingController _jenisKelaminController;
@@ -43,10 +49,13 @@ class _EditState extends State<Edit> {
     _emailController = TextEditingController(text: widget.email);
     _passwordController = TextEditingController(text: widget.password);
 
-    // Ambil path gambar dari GetStorage (jika ada)
-    String? path = box.read(keyFoto);
-    if (path != null && File(path).existsSync()) {
-      _gambarProfil = File(path);
+    if (kIsWeb) {
+      final encodedImage = box.read<List<dynamic>>(keyWebFoto);
+      if (encodedImage != null) {
+        _webImage = Uint8List.fromList(List<int>.from(encodedImage));
+      }
+    } else {
+      _gambarPath = box.read<String>(keyFoto);
     }
   }
 
@@ -54,14 +63,32 @@ class _EditState extends State<Edit> {
     final pickedFile = await picker.pickImage(source: ImageSource.gallery);
 
     if (pickedFile != null) {
-      final file = File(pickedFile.path);
-      setState(() {
-        _gambarProfil = file;
-      });
-
-      // Simpan path ke GetStorage
-      box.write(keyFoto, file.path);
+      if (kIsWeb) {
+        final bytes = await pickedFile.readAsBytes();
+        setState(() {
+          _webImage = bytes;
+        });
+        box.write(keyWebFoto, bytes.toList()); // Fix: simpan sebagai List<int>
+      } else {
+        setState(() {
+          _gambarPath = pickedFile.path;
+        });
+        box.write(keyFoto, pickedFile.path);
+      }
     }
+  }
+
+  ImageProvider? _getBackgroundImage() {
+    if (kIsWeb) {
+      if (_webImage != null) {
+        return MemoryImage(_webImage!);
+      }
+    } else {
+      if (_gambarPath != null) {
+        return FileImage(io.File(_gambarPath!));
+      }
+    }
+    return null;
   }
 
   @override
@@ -92,9 +119,8 @@ class _EditState extends State<Edit> {
                   radius: 50,
                   backgroundColor:
                       temaGelap ? Colors.grey.shade700 : Colors.grey,
-                  backgroundImage:
-                      _gambarProfil != null ? FileImage(_gambarProfil!) : null,
-                  child: _gambarProfil == null
+                  backgroundImage: _getBackgroundImage(),
+                  child: _webImage == null && _gambarPath == null
                       ? Icon(Icons.person, size: 50, color: textColor)
                       : null,
                 ),
@@ -113,21 +139,16 @@ class _EditState extends State<Edit> {
               ],
             ),
             const SizedBox(height: 30),
-            _buildTextField(
-                "Nama Pengguna", _namaController, fieldColor, textColor),
+            _buildTextField("Nama Pengguna", _namaController, fieldColor, textColor),
             const SizedBox(height: 15),
-            _buildTextField("Jenis Kelamin", _jenisKelaminController,
-                fieldColor, textColor),
+            _buildTextField("Jenis Kelamin", _jenisKelaminController, fieldColor, textColor),
             const SizedBox(height: 15),
             _buildTextField("Email", _emailController, fieldColor, textColor),
             const SizedBox(height: 15),
-            _buildTextField(
-                "Password", _passwordController, fieldColor, textColor,
-                obscure: true),
+            _buildTextField("Password", _passwordController, fieldColor, textColor, obscure: true),
             const SizedBox(height: 30),
             ElevatedButton(
               onPressed: () {
-                // Simpan data lain jika perlu
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(content: Text("Data berhasil disimpan")),
                 );
@@ -160,8 +181,7 @@ class _EditState extends State<Edit> {
         hintStyle: TextStyle(color: textColor.withOpacity(0.6)),
         filled: true,
         fillColor: fillColor,
-        contentPadding:
-            const EdgeInsets.symmetric(vertical: 12, horizontal: 15),
+        contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 15),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(25),
           borderSide: BorderSide.none,
