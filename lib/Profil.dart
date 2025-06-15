@@ -1,5 +1,10 @@
+import 'dart:io' as io;
+import 'dart:typed_data';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:get_storage/get_storage.dart';
+import 'package:catatan_dartsquad/SplashScreen.dart';
+import 'edit.dart';
 
 class Profil extends StatefulWidget {
   const Profil({super.key});
@@ -14,10 +19,48 @@ class _ProfilState extends State<Profil> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final ValueNotifier<bool> _passwordVisible = ValueNotifier<bool>(true);
-
   final box = GetStorage();
 
+  Uint8List? _webImage;
+  String? _gambarPath;
+
+  final String keyFoto = 'pathFotoProfil';
+  final String keyWebFoto = 'webFotoProfil';
+
   bool get temaGelap => box.read('temaGelap') ?? false;
+
+  @override
+  void initState() {
+    super.initState();
+
+    if (kIsWeb) {
+      final encodedImage = box.read(keyWebFoto);
+      if (encodedImage != null && encodedImage is List) {
+        _webImage = Uint8List.fromList(encodedImage.cast<int>());
+      }
+    } else {
+      _gambarPath = box.read<String>(keyFoto);
+    }
+
+    _namaController.text = box.read('nama') ?? '';
+    _jenisKelaminController.text = box.read('jenisKelamin') ?? '';
+    _emailController.text = box.read('email') ?? '';
+    _passwordController.text = box.read('password') ?? '';
+
+    // Dengarkan perubahan tema dan update UI
+    box.listenKey('temaGelap', (value) {
+      setState(() {});
+    });
+  }
+
+  ImageProvider? _getBackgroundImage() {
+    if (kIsWeb && _webImage != null) {
+      return MemoryImage(_webImage!);
+    } else if (_gambarPath != null) {
+      return FileImage(io.File(_gambarPath!));
+    }
+    return null;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -28,10 +71,7 @@ class _ProfilState extends State<Profil> {
     return Scaffold(
       backgroundColor: backgroundColor,
       appBar: AppBar(
-        title: Text(
-          "PROFIL",
-          style: TextStyle(color: textColor),
-        ),
+        title: Text("PROFIL", style: TextStyle(color: textColor)),
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color: textColor),
           onPressed: () => Navigator.pop(context),
@@ -46,7 +86,10 @@ class _ProfilState extends State<Profil> {
             CircleAvatar(
               radius: 50,
               backgroundColor: temaGelap ? Colors.grey.shade700 : Colors.grey,
-              child: Icon(Icons.person, size: 50, color: textColor),
+              backgroundImage: _getBackgroundImage(),
+              child: _webImage == null && _gambarPath == null
+                  ? Icon(Icons.person, size: 50, color: textColor)
+                  : null,
             ),
             const SizedBox(height: 30),
             _buildTextField("Nama Pengguna", _namaController, fieldColor, textColor),
@@ -60,17 +103,67 @@ class _ProfilState extends State<Profil> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                _buildButton("Logout", textColor, fieldColor, () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text("Logout berhasil")),
-                  );
-                }),
-                _buildButton("Edit", textColor, fieldColor, () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text("Data diedit: ${_namaController.text}"),
+                _buildButton("Logout", textColor, fieldColor, () async {
+                  final konfirmasi = await showDialog<bool>(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                      title: const Text("Yakin ingin logout?", style: TextStyle(fontWeight: FontWeight.bold)),
+                      content: const Text("Kamu akan keluar dari akun ini."),
+                      actionsPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      actionsAlignment: MainAxisAlignment.end,
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(context, false),
+                          child: const Text("Tidak", style: TextStyle(color: Colors.black)),
+                        ),
+                        TextButton(
+                          onPressed: () => Navigator.pop(context, true),
+                          child: const Text("Yakin", style: TextStyle(color: Colors.red)),
+                        ),
+                      ],
                     ),
                   );
+
+                  if (konfirmasi == true) {
+                    box.erase(); // Hapus semua data
+                    Navigator.pushAndRemoveUntil(
+                      context,
+                      MaterialPageRoute(builder: (_) => const SplashScreen()),
+                      (route) => false,
+                    );
+                  }
+                }),
+                _buildButton("Edit", textColor, fieldColor, () async {
+                  final hasil = await Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => Edit(
+                        nama: _namaController.text,
+                        jenisKelamin: _jenisKelaminController.text,
+                        email: _emailController.text,
+                        password: _passwordController.text,
+                      ),
+                    ),
+                  );
+
+                  if (hasil != null && hasil is Map<String, String>) {
+                    setState(() {
+                      _namaController.text = hasil['nama'] ?? _namaController.text;
+                      _jenisKelaminController.text = hasil['jenisKelamin'] ?? _jenisKelaminController.text;
+                      _emailController.text = hasil['email'] ?? _emailController.text;
+                      _passwordController.text = hasil['password'] ?? _passwordController.text;
+
+                      if (kIsWeb) {
+                        final encodedImage = box.read(keyWebFoto);
+                        if (encodedImage != null && encodedImage is List) {
+                          _webImage = Uint8List.fromList(encodedImage.cast<int>());
+                        }
+                      } else {
+                        _gambarPath = box.read<String>(keyFoto);
+                      }
+                    });
+                  }
                 }),
               ],
             ),
@@ -121,7 +214,10 @@ class _ProfilState extends State<Profil> {
             ),
             prefixIcon: Icon(Icons.lock, color: textColor),
             suffixIcon: IconButton(
-              icon: Icon(isVisible ? Icons.visibility : Icons.visibility_off, color: textColor),
+              icon: Icon(
+                isVisible ? Icons.visibility : Icons.visibility_off,
+                color: textColor,
+              ),
               onPressed: () {
                 _passwordVisible.value = !isVisible;
               },
@@ -144,7 +240,7 @@ class _ProfilState extends State<Profil> {
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
         elevation: 3,
       ),
-      child: Text(label),
+      child: Text(label, style: const TextStyle(fontWeight: FontWeight.bold)),
     );
   }
 }

@@ -43,7 +43,6 @@ class _LoginState extends State<Login> {
     String? savedEmail = box.read('email');
     String? savedPassword = box.read('password');
 
-    // Tambahan: cek apakah belum ada akun
     if (savedEmail == null || savedPassword == null) {
       showDialog(
         context: context,
@@ -78,7 +77,7 @@ class _LoginState extends State<Login> {
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop();
-                box.write('sudah_login', true); // simpan status login
+                box.write('sudah_login', true);
                 Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(builder: (context) => const Dashboard()),
@@ -162,7 +161,8 @@ class _LoginState extends State<Login> {
                 const SizedBox(height: 30),
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 14),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 40, vertical: 14),
                     backgroundColor: Colors.grey.shade300,
                     elevation: 4,
                     shape: RoundedRectangleBorder(
