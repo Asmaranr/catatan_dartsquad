@@ -15,7 +15,6 @@ class _RegisterState extends State<Register> {
   final TextEditingController passwordController = TextEditingController();
 
   final box = GetStorage();
-
   bool _obscurePassword = true;
 
   void _register() {
@@ -28,7 +27,6 @@ class _RegisterState extends State<Register> {
         jk.isNotEmpty &&
         email.isNotEmpty &&
         password.isNotEmpty) {
-      // Simpan ke local storage
       box.write('nama', nama);
       box.write('jk', jk);
       box.write('email', email);
@@ -68,60 +66,89 @@ class _RegisterState extends State<Register> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      body: Center(
-        child: Container(
-          padding: const EdgeInsets.all(20),
-          margin: const EdgeInsets.symmetric(horizontal: 30),
-          decoration: BoxDecoration(
-            color: Colors.grey.shade100,
-            borderRadius: BorderRadius.circular(20),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.grey.shade400,
-                blurRadius: 8,
-                offset: const Offset(2, 6),
-              ),
-            ],
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Text(
-                'REGISTER',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 18,
-                ),
-              ),
-              const SizedBox(height: 20),
-              _buildTextField("Nama :", namaController),
-              _buildTextField("Jenis Kelamin :", jkController),
-              _buildTextField("Email :", emailController),
-              _buildTextField("Password :", passwordController, obscure: true),
-              const SizedBox(height: 30),
-              ElevatedButton(
-                onPressed: _register,
-                style: ElevatedButton.styleFrom(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 40, vertical: 14),
-                  backgroundColor: Colors.grey.shade300,
-                  elevation: 4,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(15),
+      body: Stack(
+        children: [
+          // Tombol kembali di pojok kiri atas
+          Positioned(
+            top: 40,
+            left: 20,
+            child: GestureDetector(
+              onTap: () {
+                Navigator.of(context).pop(); // Kembali ke login
+              },
+              child: Row(
+                children: const [
+                  Icon(Icons.arrow_back, color: Colors.black),
+                  SizedBox(width: 5),
+                  Text(
+                    "Kembali",
+                    style: TextStyle(fontSize: 16, color: Colors.black),
                   ),
+                ],
+              ),
+            ),
+          ),
+
+          // Formulir di tengah
+          Center(
+            child: SingleChildScrollView(
+              child: Container(
+                padding: const EdgeInsets.all(20),
+                margin: const EdgeInsets.symmetric(horizontal: 30),
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade100,
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.grey.shade400,
+                      blurRadius: 8,
+                      offset: const Offset(2, 6),
+                    ),
+                  ],
                 ),
-                child: const Text(
-                  'DAFTAR',
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                  ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Text(
+                      'REGISTER',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 18,
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    _buildTextField("Nama :", namaController),
+                    _buildTextField("Jenis Kelamin :", jkController),
+                    _buildTextField("Email :", emailController),
+                    _buildTextField("Password :", passwordController,
+                        obscure: true),
+                    const SizedBox(height: 30),
+                    ElevatedButton(
+                      onPressed: _register,
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 40, vertical: 14),
+                        backgroundColor: Colors.grey.shade300,
+                        elevation: 4,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(15),
+                        ),
+                      ),
+                      child: const Text(
+                        'DAFTAR',
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            ],
+            ),
           ),
-        ),
+        ],
       ),
     );
   }
@@ -141,11 +168,22 @@ class _RegisterState extends State<Register> {
             flex: 5,
             child: TextField(
               controller: controller,
-              obscureText: obscure,
-              decoration: const InputDecoration(
+              obscureText: obscure ? _obscurePassword : false,
+              decoration: InputDecoration(
                 isDense: true,
-                contentPadding: EdgeInsets.symmetric(vertical: 4),
-                border: UnderlineInputBorder(),
+                contentPadding: const EdgeInsets.symmetric(vertical: 4),
+                border: const UnderlineInputBorder(),
+                suffixIcon: obscure
+                    ? IconButton(
+                        icon: Icon(
+                          _obscurePassword
+                              ? Icons.visibility_off
+                              : Icons.visibility,
+                          color: Colors.grey,
+                        ),
+                        onPressed: _togglePasswordVisibility,
+                      )
+                    : null,
               ),
             ),
           ),
