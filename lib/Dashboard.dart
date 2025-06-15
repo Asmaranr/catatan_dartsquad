@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'ganti_tema.dart';
 import 'tambah_catatan.dart';
+import 'profil.dart';
 
 class Dashboard extends StatefulWidget {
   const Dashboard({super.key});
@@ -129,7 +130,7 @@ class _DashboardState extends State<Dashboard> {
                   icon: Icon(Icons.person,
                       color: isDark ? Colors.white : Colors.black),
                   onPressed: () {
-                    print('Person icon clicked');
+                    Get.to(() => const Profil()); // <- Navigasi ke Profil
                   },
                 ),
               ],
