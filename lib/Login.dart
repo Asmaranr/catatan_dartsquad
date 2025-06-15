@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get_storage/get_storage.dart';
+import 'Register.dart'; // pastikan ini sudah di-import
 
 class Login extends StatefulWidget {
   const Login({super.key});
@@ -12,11 +13,14 @@ class _LoginState extends State<Login> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
 
-  final box = GetStorage(); 
+  final box = GetStorage();
   bool _obscurePassword = true;
 
   void _navigateToRegister() {
-    Navigator.pushNamed(context, '/register');
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const Register()),
+    );
   }
 
   void _togglePasswordVisibility() {
@@ -42,10 +46,9 @@ class _LoginState extends State<Login> {
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop();
-
-                final box = GetStorage();
                 box.write('sudah_login', true);
-                Navigator.pushNamed(context, '/dashboard'); 
+                Navigator.pushNamed(
+                    context, '/dashboard'); // tetap pakai route ini
               },
               child: const Text('OKE'),
             ),
@@ -53,7 +56,6 @@ class _LoginState extends State<Login> {
         ),
       );
     } else {
-      // Login gagal
       showDialog(
         context: context,
         builder: (_) => AlertDialog(
@@ -68,7 +70,7 @@ class _LoginState extends State<Login> {
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop();
-                _navigateToRegister();
+                _navigateToRegister(); // panggil navigator manual
               },
               child: const Text('REGISTER'),
             ),
@@ -181,7 +183,7 @@ class _LoginState extends State<Login> {
                       borderRadius: BorderRadius.circular(15),
                     ),
                   ),
-                  onPressed: _login, 
+                  onPressed: _login,
                   child: const Text(
                     'LOGIN',
                     style: TextStyle(
