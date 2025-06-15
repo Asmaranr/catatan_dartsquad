@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get_storage/get_storage.dart';
-import 'Register.dart'; // pastikan ini sudah di-import
+import 'Register.dart';
+import 'Dashboard.dart';
 
 class Login extends StatefulWidget {
   const Login({super.key});
@@ -45,10 +46,12 @@ class _LoginState extends State<Login> {
           actions: [
             TextButton(
               onPressed: () {
-                Navigator.of(context).pop();
+                Navigator.of(context).pop(); // Tutup dialog
                 box.write('sudah_login', true);
-                Navigator.pushNamed(
-                    context, '/dashboard'); // tetap pakai route ini
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => const Dashboard()),
+                );
               },
               child: const Text('OKE'),
             ),
@@ -70,7 +73,7 @@ class _LoginState extends State<Login> {
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop();
-                _navigateToRegister(); // panggil navigator manual
+                _navigateToRegister();
               },
               child: const Text('REGISTER'),
             ),
@@ -91,7 +94,6 @@ class _LoginState extends State<Login> {
             constraints: const BoxConstraints(maxWidth: 400),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 const Text(
                   'SILAHKAN MELAKUKAN LOGIN',
@@ -101,58 +103,15 @@ class _LoginState extends State<Login> {
                   ),
                 ),
                 const SizedBox(height: 30),
-                Container(
-                  decoration: BoxDecoration(
-                    color: Colors.grey.shade200,
-                    borderRadius: BorderRadius.circular(20),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.grey.shade400,
-                        blurRadius: 4,
-                        offset: const Offset(2, 4),
-                      )
-                    ],
-                  ),
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: TextField(
-                    controller: emailController,
-                    decoration: const InputDecoration(
-                      border: InputBorder.none,
-                      labelText: 'Email :',
-                    ),
-                  ),
+                _buildInputField(
+                  label: 'Email :',
+                  controller: emailController,
                 ),
                 const SizedBox(height: 20),
-                Container(
-                  decoration: BoxDecoration(
-                    color: Colors.grey.shade200,
-                    borderRadius: BorderRadius.circular(20),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.grey.shade400,
-                        blurRadius: 4,
-                        offset: const Offset(2, 4),
-                      ),
-                    ],
-                  ),
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: TextField(
-                    controller: passwordController,
-                    obscureText: _obscurePassword,
-                    decoration: InputDecoration(
-                      border: InputBorder.none,
-                      labelText: 'Password :',
-                      suffixIcon: IconButton(
-                        icon: Icon(
-                          _obscurePassword
-                              ? Icons.visibility_off
-                              : Icons.visibility,
-                          color: Colors.grey,
-                        ),
-                        onPressed: _togglePasswordVisibility,
-                      ),
-                    ),
-                  ),
+                _buildInputField(
+                  label: 'Password :',
+                  controller: passwordController,
+                  isPassword: true,
                 ),
                 const SizedBox(height: 10),
                 Row(
@@ -196,6 +155,44 @@ class _LoginState extends State<Login> {
               ],
             ),
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildInputField({
+    required String label,
+    required TextEditingController controller,
+    bool isPassword = false,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.grey.shade200,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.shade400,
+            blurRadius: 4,
+            offset: const Offset(2, 4),
+          ),
+        ],
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: TextField(
+        controller: controller,
+        obscureText: isPassword ? _obscurePassword : false,
+        decoration: InputDecoration(
+          border: InputBorder.none,
+          labelText: label,
+          suffixIcon: isPassword
+              ? IconButton(
+                  icon: Icon(
+                    _obscurePassword ? Icons.visibility_off : Icons.visibility,
+                    color: Colors.grey,
+                  ),
+                  onPressed: _togglePasswordVisibility,
+                )
+              : null,
         ),
       ),
     );

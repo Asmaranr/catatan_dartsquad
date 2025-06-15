@@ -16,6 +16,8 @@ class _RegisterState extends State<Register> {
 
   final box = GetStorage();
 
+  bool _obscurePassword = true;
+
   void _register() {
     String nama = namaController.text.trim();
     String jk = jkController.text.trim();
@@ -41,8 +43,8 @@ class _RegisterState extends State<Register> {
           actions: [
             TextButton(
               onPressed: () {
-                Navigator.of(context).pop(); // tutup dialog
-                Navigator.of(context).pop(); // kembali ke halaman login
+                Navigator.of(context).pop();
+                Navigator.of(context).pop();
               },
               child: const Text("OKE"),
             ),
@@ -54,6 +56,12 @@ class _RegisterState extends State<Register> {
         const SnackBar(content: Text('Semua kolom wajib diisi')),
       );
     }
+  }
+
+  void _togglePasswordVisibility() {
+    setState(() {
+      _obscurePassword = !_obscurePassword;
+    });
   }
 
   @override
