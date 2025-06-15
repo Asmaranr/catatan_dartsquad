@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'ganti_tema.dart';
-import 'tambah_catatan.dart'; // Halaman tambah catatan jika ada
+import 'tambah_catatan.dart';
 
 class Dashboard extends StatefulWidget {
   const Dashboard({super.key});

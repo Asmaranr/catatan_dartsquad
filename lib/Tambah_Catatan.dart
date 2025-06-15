@@ -2,6 +2,7 @@ import 'dart:io' as io;
 import 'dart:typed_data';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:get_storage/get_storage.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:catatan_dartsquad/Dashboard.dart';
 
@@ -15,9 +16,11 @@ class TambahCatatan extends StatefulWidget {
 class _TambahCatatanState extends State<TambahCatatan> {
   final TextEditingController _judulController = TextEditingController();
   final TextEditingController _isiController = TextEditingController();
+  final ImagePicker _picker = ImagePicker();
+  final box = GetStorage();
+
   io.File? _selectedImageFile;
   Uint8List? _selectedImageBytes;
-  final ImagePicker _picker = ImagePicker();
 
   Future<void> _pickImage() async {
     final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
@@ -37,6 +40,12 @@ class _TambahCatatanState extends State<TambahCatatan> {
 
   @override
   Widget build(BuildContext context) {
+    final bool isDark = box.read('temaGelap') ?? false;
+    final Color bgColor = isDark ? Colors.black : Colors.white;
+    final Color iconColor = isDark ? Colors.white : Colors.black;
+    final Color textColor = isDark ? Colors.white : Colors.black;
+    final Color hintColor = isDark ? Colors.white54 : Colors.black54;
+
     Widget? imageWidget;
     if (kIsWeb && _selectedImageBytes != null) {
       imageWidget = Image.memory(_selectedImageBytes!, fit: BoxFit.cover);
@@ -45,12 +54,14 @@ class _TambahCatatanState extends State<TambahCatatan> {
     }
 
     return Scaffold(
+      backgroundColor: bgColor,
       appBar: AppBar(
+        backgroundColor: bgColor,
+        elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () {
-            Navigator.pop(context);
-          },
+          onPressed: () => Navigator.pop(context),
+          color: iconColor,
         ),
         title: const Text(""),
         actions: [
@@ -61,14 +72,9 @@ class _TambahCatatanState extends State<TambahCatatan> {
                 MaterialPageRoute(builder: (context) => const Dashboard()),
               );
             },
-            child: const Text(
-              "SIMPAN",
-              style: TextStyle(color: Colors.black),
-            ),
+            child: Text("SIMPAN", style: TextStyle(color: iconColor)),
           ),
         ],
-        backgroundColor: Colors.transparent,
-        elevation: 0,
       ),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -77,9 +83,14 @@ class _TambahCatatanState extends State<TambahCatatan> {
           children: [
             TextField(
               controller: _judulController,
-              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-              decoration: const InputDecoration(
+              style: TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+                color: textColor,
+              ),
+              decoration: InputDecoration(
                 hintText: "Judul",
+                hintStyle: TextStyle(color: hintColor),
                 border: InputBorder.none,
               ),
             ),
@@ -87,8 +98,10 @@ class _TambahCatatanState extends State<TambahCatatan> {
             TextField(
               controller: _isiController,
               maxLines: null,
-              decoration: const InputDecoration(
+              style: TextStyle(fontSize: 16, color: textColor),
+              decoration: InputDecoration(
                 hintText: "Tulis lebih banyak di sini...",
+                hintStyle: TextStyle(color: hintColor),
                 border: InputBorder.none,
               ),
             ),
@@ -121,7 +134,8 @@ class _TambahCatatanState extends State<TambahCatatan> {
                         ),
                         child: const Padding(
                           padding: EdgeInsets.all(4.0),
-                          child: Icon(Icons.close, color: Colors.white, size: 20),
+                          child:
+                              Icon(Icons.close, color: Colors.white, size: 20),
                         ),
                       ),
                     ),
@@ -132,7 +146,7 @@ class _TambahCatatanState extends State<TambahCatatan> {
             Align(
               alignment: Alignment.bottomRight,
               child: IconButton(
-                icon: const Icon(Icons.add_photo_alternate),
+                icon: Icon(Icons.add_photo_alternate, color: iconColor),
                 iconSize: 30,
                 onPressed: _pickImage,
               ),

@@ -22,6 +22,8 @@ class _GantiTemaState extends State<GantiTema> {
 
   @override
   Widget build(BuildContext context) {
+    print("Tema Gelap aktif: $temaGelap"); // Debugging
+
     return Scaffold(
       backgroundColor: temaGelap ? Colors.black : Colors.white,
       appBar: AppBar(
@@ -65,9 +67,13 @@ class _GantiTemaState extends State<GantiTema> {
                         ),
                       ),
                       const SizedBox(height: 8),
-                      const Text(
+                      Text(
                         'Tema Terang',
-                        style: TextStyle(fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                          color: temaGelap ? Colors.white : Colors.black,
+                        ),
                       ),
                     ],
                   ),
@@ -91,6 +97,7 @@ class _GantiTemaState extends State<GantiTema> {
                         'Tema Gelap',
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
+                          fontSize: 16,
                           color: temaGelap ? Colors.white : Colors.black,
                         ),
                       ),

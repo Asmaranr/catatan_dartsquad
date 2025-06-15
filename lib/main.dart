@@ -1,8 +1,8 @@
-import 'package:catatan_dartsquad/dashboard.dart';
+import 'package:catatan_dartsquad/Dashboard.dart';
+import 'package:catatan_dartsquad/Tambah_Catatan.dart';
 import 'package:flutter/material.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:get/get.dart';
-import 'package:catatan_dartsquad/Tambah_Catatan.dart';
 import 'package:image_picker/image_picker.dart';
 
 void main() async {
@@ -24,7 +24,7 @@ class MyApp extends StatelessWidget {
         ),
         useMaterial3: true,
       ),
-      home: const TambahCatatan(),
+      home: Dashboard(),
     );
   }
 }
