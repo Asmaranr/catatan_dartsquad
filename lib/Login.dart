@@ -46,7 +46,7 @@ class _LoginState extends State<Login> {
           actions: [
             TextButton(
               onPressed: () {
-                Navigator.of(context).pop(); // Tutup dialog
+                Navigator.of(context).pop();
                 box.write('sudah_login', true);
                 Navigator.pushReplacement(
                   context,

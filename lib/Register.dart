@@ -68,28 +68,16 @@ class _RegisterState extends State<Register> {
       backgroundColor: Colors.white,
       body: Stack(
         children: [
-          // Tombol kembali di pojok kiri atas
           Positioned(
             top: 40,
             left: 20,
             child: GestureDetector(
               onTap: () {
-                Navigator.of(context).pop(); // Kembali ke login
+                Navigator.of(context).pop();
               },
-              child: Row(
-                children: const [
-                  Icon(Icons.arrow_back, color: Colors.black),
-                  SizedBox(width: 5),
-                  Text(
-                    "Kembali",
-                    style: TextStyle(fontSize: 16, color: Colors.black),
-                  ),
-                ],
-              ),
+              child: const Icon(Icons.arrow_back, color: Colors.black),
             ),
           ),
-
-          // Formulir di tengah
           Center(
             child: SingleChildScrollView(
               child: Container(
