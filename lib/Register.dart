@@ -10,25 +10,26 @@ class Register extends StatefulWidget {
 
 class _RegisterState extends State<Register> {
   final TextEditingController namaController = TextEditingController();
-  final TextEditingController jkController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
 
   final box = GetStorage();
   bool _obscurePassword = true;
+  String? selectedJK; // <-- untuk dropdown jenis kelamin
+
+  final List<String> genderOptions = ['Laki-laki', 'Perempuan'];
 
   void _register() {
     String nama = namaController.text.trim();
-    String jk = jkController.text.trim();
     String email = emailController.text.trim();
     String password = passwordController.text;
 
     if (nama.isNotEmpty &&
-        jk.isNotEmpty &&
+        selectedJK != null &&
         email.isNotEmpty &&
         password.isNotEmpty) {
       box.write('nama', nama);
-      box.write('jk', jk);
+      box.write('jenisKelamin', selectedJK);
       box.write('email', email);
       box.write('password', password);
 
@@ -36,8 +37,7 @@ class _RegisterState extends State<Register> {
         context: context,
         builder: (_) => AlertDialog(
           title: const Text("Registrasi Berhasil"),
-          content:
-              const Text("Silakan login menggunakan email dan password Anda."),
+          content: const Text("Silakan login menggunakan email dan password Anda."),
           actions: [
             TextButton(
               onPressed: () {
@@ -106,16 +106,14 @@ class _RegisterState extends State<Register> {
                     ),
                     const SizedBox(height: 20),
                     _buildTextField("Nama :", namaController),
-                    _buildTextField("Jenis Kelamin :", jkController),
+                    _buildDropdownField("Jenis Kelamin :", genderOptions),
                     _buildTextField("Email :", emailController),
-                    _buildTextField("Password :", passwordController,
-                        obscure: true),
+                    _buildTextField("Password :", passwordController, obscure: true),
                     const SizedBox(height: 30),
                     ElevatedButton(
                       onPressed: _register,
                       style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 40, vertical: 14),
+                        padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 14),
                         backgroundColor: Colors.grey.shade300,
                         elevation: 4,
                         shape: RoundedRectangleBorder(
@@ -141,16 +139,12 @@ class _RegisterState extends State<Register> {
     );
   }
 
-  Widget _buildTextField(String label, TextEditingController controller,
-      {bool obscure = false}) {
+  Widget _buildTextField(String label, TextEditingController controller, {bool obscure = false}) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: Row(
         children: [
-          Expanded(
-            flex: 2,
-            child: Text(label),
-          ),
+          Expanded(flex: 2, child: Text(label)),
           const Text(':  '),
           Expanded(
             flex: 5,
@@ -164,15 +158,47 @@ class _RegisterState extends State<Register> {
                 suffixIcon: obscure
                     ? IconButton(
                         icon: Icon(
-                          _obscurePassword
-                              ? Icons.visibility_off
-                              : Icons.visibility,
+                          _obscurePassword ? Icons.visibility_off : Icons.visibility,
                           color: Colors.grey,
                         ),
                         onPressed: _togglePasswordVisibility,
                       )
                     : null,
               ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDropdownField(String label, List<String> items) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: Row(
+        children: [
+          Expanded(flex: 2, child: Text(label)),
+          const Text(':  '),
+          Expanded(
+            flex: 5,
+            child: DropdownButtonFormField<String>(
+              value: selectedJK,
+              isDense: true,
+              decoration: const InputDecoration(
+                border: UnderlineInputBorder(),
+                contentPadding: EdgeInsets.symmetric(vertical: 0),
+              ),
+              items: items.map((value) {
+                return DropdownMenuItem<String>(
+                  value: value,
+                  child: Text(value),
+                );
+              }).toList(),
+              onChanged: (value) {
+                setState(() {
+                  selectedJK = value;
+                });
+              },
             ),
           ),
         ],

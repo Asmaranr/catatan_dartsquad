@@ -3,7 +3,7 @@ import 'dart:typed_data';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:get_storage/get_storage.dart';
-import 'package:catatan_dartsquad/Logout.dart';
+import 'package:catatan_dartsquad/SplashScreen.dart';
 import 'edit.dart';
 
 class Profil extends StatefulWidget {
@@ -32,6 +32,7 @@ class _ProfilState extends State<Profil> {
   @override
   void initState() {
     super.initState();
+
     if (kIsWeb) {
       final encodedImage = box.read(keyWebFoto);
       if (encodedImage != null && encodedImage is List) {
@@ -40,17 +41,23 @@ class _ProfilState extends State<Profil> {
     } else {
       _gambarPath = box.read<String>(keyFoto);
     }
+
+    _namaController.text = box.read('nama') ?? '';
+    _jenisKelaminController.text = box.read('jenisKelamin') ?? '';
+    _emailController.text = box.read('email') ?? '';
+    _passwordController.text = box.read('password') ?? '';
+
+    // Dengarkan perubahan tema dan update UI
+    box.listenKey('temaGelap', (value) {
+      setState(() {});
+    });
   }
 
   ImageProvider? _getBackgroundImage() {
-    if (kIsWeb) {
-      if (_webImage != null) {
-        return MemoryImage(_webImage!);
-      }
-    } else {
-      if (_gambarPath != null) {
-        return FileImage(io.File(_gambarPath!));
-      }
+    if (kIsWeb && _webImage != null) {
+      return MemoryImage(_webImage!);
+    } else if (_gambarPath != null) {
+      return FileImage(io.File(_gambarPath!));
     }
     return null;
   }
@@ -96,11 +103,36 @@ class _ProfilState extends State<Profil> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                _buildButton("Logout", textColor, fieldColor, () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => const LogoutPage()),
+                _buildButton("Logout", textColor, fieldColor, () async {
+                  final konfirmasi = await showDialog<bool>(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                      title: const Text("Yakin ingin logout?", style: TextStyle(fontWeight: FontWeight.bold)),
+                      content: const Text("Kamu akan keluar dari akun ini."),
+                      actionsPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      actionsAlignment: MainAxisAlignment.end,
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(context, false),
+                          child: const Text("Tidak", style: TextStyle(color: Colors.black)),
+                        ),
+                        TextButton(
+                          onPressed: () => Navigator.pop(context, true),
+                          child: const Text("Yakin", style: TextStyle(color: Colors.red)),
+                        ),
+                      ],
+                    ),
                   );
+
+                  if (konfirmasi == true) {
+                    box.erase(); // Hapus semua data
+                    Navigator.pushAndRemoveUntil(
+                      context,
+                      MaterialPageRoute(builder: (_) => const SplashScreen()),
+                      (route) => false,
+                    );
+                  }
                 }),
                 _buildButton("Edit", textColor, fieldColor, () async {
                   final hasil = await Navigator.push(

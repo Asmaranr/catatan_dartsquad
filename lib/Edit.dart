@@ -1,9 +1,11 @@
+// ================================
+// FILE: edit.dart
+// ================================
 import 'dart:typed_data';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:image_picker/image_picker.dart';
-// hanya digunakan untuk non-web
 import 'dart:io' as io;
 
 class Edit extends StatefulWidget {
@@ -39,6 +41,8 @@ class _EditState extends State<Edit> {
   late TextEditingController _emailController;
   late TextEditingController _passwordController;
 
+  bool _passwordVisible = false;
+
   bool get temaGelap => box.read('temaGelap') ?? false;
 
   @override
@@ -68,7 +72,7 @@ class _EditState extends State<Edit> {
         setState(() {
           _webImage = bytes;
         });
-        box.write(keyWebFoto, bytes.toList()); // Fix: simpan sebagai List<int>
+        box.write(keyWebFoto, bytes.toList());
       } else {
         setState(() {
           _gambarPath = pickedFile.path;
@@ -79,14 +83,10 @@ class _EditState extends State<Edit> {
   }
 
   ImageProvider? _getBackgroundImage() {
-    if (kIsWeb) {
-      if (_webImage != null) {
-        return MemoryImage(_webImage!);
-      }
-    } else {
-      if (_gambarPath != null) {
-        return FileImage(io.File(_gambarPath!));
-      }
+    if (kIsWeb && _webImage != null) {
+      return MemoryImage(_webImage!);
+    } else if (_gambarPath != null) {
+      return FileImage(io.File(_gambarPath!));
     }
     return null;
   }
@@ -117,8 +117,7 @@ class _EditState extends State<Edit> {
               children: [
                 CircleAvatar(
                   radius: 50,
-                  backgroundColor:
-                      temaGelap ? Colors.grey.shade700 : Colors.grey,
+                  backgroundColor: temaGelap ? Colors.grey.shade700 : Colors.grey,
                   backgroundImage: _getBackgroundImage(),
                   child: _webImage == null && _gambarPath == null
                       ? Icon(Icons.person, size: 50, color: textColor)
@@ -141,18 +140,29 @@ class _EditState extends State<Edit> {
             const SizedBox(height: 30),
             _buildTextField("Nama Pengguna", _namaController, fieldColor, textColor),
             const SizedBox(height: 15),
-            _buildTextField("Jenis Kelamin", _jenisKelaminController, fieldColor, textColor),
+            _buildDropdownJenisKelamin(fieldColor, textColor),
             const SizedBox(height: 15),
             _buildTextField("Email", _emailController, fieldColor, textColor),
             const SizedBox(height: 15),
-            _buildTextField("Password", _passwordController, fieldColor, textColor, obscure: true),
+            _buildPasswordField("Password", _passwordController, fieldColor, textColor),
             const SizedBox(height: 30),
             ElevatedButton(
               onPressed: () {
+                box.write('nama', _namaController.text);
+                box.write('jenisKelamin', _jenisKelaminController.text);
+                box.write('email', _emailController.text);
+                box.write('password', _passwordController.text);
+
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(content: Text("Data berhasil disimpan")),
                 );
-                Navigator.pop(context);
+
+                Navigator.pop(context, {
+                  'nama': _namaController.text,
+                  'jenisKelamin': _jenisKelaminController.text,
+                  'email': _emailController.text,
+                  'password': _passwordController.text,
+                });
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: fieldColor,
@@ -187,6 +197,68 @@ class _EditState extends State<Edit> {
           borderSide: BorderSide.none,
         ),
       ),
+    );
+  }
+
+  Widget _buildPasswordField(String hint, TextEditingController controller,
+      Color fillColor, Color textColor) {
+    return TextField(
+      controller: controller,
+      obscureText: !_passwordVisible,
+      obscuringCharacter: '*',
+      style: TextStyle(color: textColor),
+      decoration: InputDecoration(
+        hintText: hint,
+        hintStyle: TextStyle(color: textColor.withOpacity(0.6)),
+        filled: true,
+        fillColor: fillColor,
+        contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 15),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(25),
+          borderSide: BorderSide.none,
+        ),
+        suffixIcon: IconButton(
+          icon: Icon(
+            _passwordVisible ? Icons.visibility : Icons.visibility_off,
+            color: textColor,
+          ),
+          onPressed: () {
+            setState(() {
+              _passwordVisible = !_passwordVisible;
+            });
+          },
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDropdownJenisKelamin(Color fillColor, Color textColor) {
+    return DropdownButtonFormField<String>(
+      value: _jenisKelaminController.text.isNotEmpty ? _jenisKelaminController.text : null,
+      items: ['Laki-laki', 'Perempuan'].map((String value) {
+        return DropdownMenuItem<String>(
+          value: value,
+          child: Text(value, style: TextStyle(color: textColor)),
+        );
+      }).toList(),
+      onChanged: (newValue) {
+        setState(() {
+          _jenisKelaminController.text = newValue!;
+        });
+      },
+      decoration: InputDecoration(
+        hintText: "Jenis Kelamin",
+        hintStyle: TextStyle(color: textColor.withOpacity(0.6)),
+        filled: true,
+        fillColor: fillColor,
+        contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 15),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(25),
+          borderSide: BorderSide.none,
+        ),
+      ),
+      dropdownColor: fillColor,
+      style: TextStyle(color: textColor),
     );
   }
 }

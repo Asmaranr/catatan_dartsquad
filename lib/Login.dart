@@ -13,7 +13,6 @@ class Login extends StatefulWidget {
 class _LoginState extends State<Login> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
-
   final box = GetStorage();
   bool _obscurePassword = true;
 
@@ -47,7 +46,7 @@ class _LoginState extends State<Login> {
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop();
-                box.write('sudah_login', true);
+                box.write('sudah_login', true); // Simpan status login
                 Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(builder: (context) => const Dashboard()),
@@ -97,10 +96,7 @@ class _LoginState extends State<Login> {
               children: [
                 const Text(
                   'SILAHKAN MELAKUKAN LOGIN',
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 30),
                 _buildInputField(
@@ -134,8 +130,7 @@ class _LoginState extends State<Login> {
                 const SizedBox(height: 30),
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 40, vertical: 14),
+                    padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 14),
                     backgroundColor: Colors.grey.shade300,
                     elevation: 4,
                     shape: RoundedRectangleBorder(
