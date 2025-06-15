@@ -1,6 +1,7 @@
 import 'package:catatan_dartsquad/Dashboard.dart';
 import 'package:catatan_dartsquad/Profil.dart';
 import 'package:catatan_dartsquad/Tambah_Catatan.dart';
+import 'package:catatan_dartsquad/Logout.dart';
 import 'package:flutter/material.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:get/get.dart';

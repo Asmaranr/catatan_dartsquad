@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get_storage/get_storage.dart';
+import 'package:catatan_dartsquad/Logout.dart'; // pastikan nama file benar
+import 'edit.dart'; // halaman edit profil
 
 class Profil extends StatefulWidget {
   const Profil({super.key});
@@ -49,26 +51,37 @@ class _ProfilState extends State<Profil> {
               child: Icon(Icons.person, size: 50, color: textColor),
             ),
             const SizedBox(height: 30),
-            _buildTextField("Nama Pengguna", _namaController, fieldColor, textColor),
+            _buildTextField(
+                "Nama Pengguna", _namaController, fieldColor, textColor),
             const SizedBox(height: 15),
-            _buildTextField("Jenis Kelamin", _jenisKelaminController, fieldColor, textColor),
+            _buildTextField("Jenis Kelamin", _jenisKelaminController,
+                fieldColor, textColor),
             const SizedBox(height: 15),
             _buildTextField("Email", _emailController, fieldColor, textColor),
             const SizedBox(height: 15),
-            _buildPasswordField("Password", _passwordController, fieldColor, textColor),
+            _buildPasswordField(
+                "Password", _passwordController, fieldColor, textColor),
             const SizedBox(height: 30),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
+                // Tombol Logout diganti agar pindah ke halaman LogoutPage
                 _buildButton("Logout", textColor, fieldColor, () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text("Logout berhasil")),
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const LogoutPage()),
                   );
                 }),
                 _buildButton("Edit", textColor, fieldColor, () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text("Data diedit: ${_namaController.text}"),
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => Edit(
+                        nama: _namaController.text,
+                        jenisKelamin: _jenisKelaminController.text,
+                        email: _emailController.text,
+                        password: _passwordController.text,
+                      ),
                     ),
                   );
                 }),
@@ -80,7 +93,8 @@ class _ProfilState extends State<Profil> {
     );
   }
 
-  Widget _buildTextField(String hint, TextEditingController controller, Color fillColor, Color textColor,
+  Widget _buildTextField(String hint, TextEditingController controller,
+      Color fillColor, Color textColor,
       {bool obscure = false}) {
     return TextField(
       controller: controller,
@@ -91,7 +105,8 @@ class _ProfilState extends State<Profil> {
         hintStyle: TextStyle(color: textColor.withOpacity(0.6)),
         filled: true,
         fillColor: fillColor,
-        contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 15),
+        contentPadding:
+            const EdgeInsets.symmetric(vertical: 12, horizontal: 15),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(25),
           borderSide: BorderSide.none,
@@ -100,7 +115,8 @@ class _ProfilState extends State<Profil> {
     );
   }
 
-  Widget _buildPasswordField(String hint, TextEditingController controller, Color fillColor, Color textColor) {
+  Widget _buildPasswordField(String hint, TextEditingController controller,
+      Color fillColor, Color textColor) {
     return ValueListenableBuilder<bool>(
       valueListenable: _passwordVisible,
       builder: (context, isVisible, child) {
@@ -114,14 +130,18 @@ class _ProfilState extends State<Profil> {
             hintStyle: TextStyle(color: textColor.withOpacity(0.6)),
             filled: true,
             fillColor: fillColor,
-            contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 15),
+            contentPadding:
+                const EdgeInsets.symmetric(vertical: 12, horizontal: 15),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(25),
               borderSide: BorderSide.none,
             ),
             prefixIcon: Icon(Icons.lock, color: textColor),
             suffixIcon: IconButton(
-              icon: Icon(isVisible ? Icons.visibility : Icons.visibility_off, color: textColor),
+              icon: Icon(
+                isVisible ? Icons.visibility : Icons.visibility_off,
+                color: textColor,
+              ),
               onPressed: () {
                 _passwordVisible.value = !isVisible;
               },
@@ -132,7 +152,8 @@ class _ProfilState extends State<Profil> {
     );
   }
 
-  Widget _buildButton(String label, Color textColor, Color backgroundColor, VoidCallback onPressed) {
+  Widget _buildButton(String label, Color textColor, Color backgroundColor,
+      VoidCallback onPressed) {
     return ElevatedButton(
       onPressed: onPressed,
       style: ElevatedButton.styleFrom(
@@ -144,7 +165,7 @@ class _ProfilState extends State<Profil> {
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
         elevation: 3,
       ),
-      child: Text(label),
+      child: Text(label, style: const TextStyle(fontWeight: FontWeight.bold)),
     );
   }
 }
