@@ -115,10 +115,12 @@ class _DashboardState extends State<Dashboard> {
                 IconButton(
                   icon: Icon(Icons.palette,
                       color: isDark ? Colors.white : Colors.black),
-                  onPressed: () {
-                    Get.to(() => const GantiTema());
+                  onPressed: () async {
+                    await Get.to(() => const GantiTema());
+                    setState(() {}); 
                   },
                 ),
+
                 IconButton(
                   icon: Icon(Icons.add_circle,
                       size: 40, color: isDark ? Colors.white : Colors.black),
