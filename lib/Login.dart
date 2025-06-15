@@ -13,7 +13,6 @@ class Login extends StatefulWidget {
 class _LoginState extends State<Login> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
-
   final box = GetStorage();
   bool _obscurePassword = true;
 
@@ -34,8 +33,40 @@ class _LoginState extends State<Login> {
     String inputEmail = emailController.text.trim();
     String inputPassword = passwordController.text;
 
-    String savedEmail = box.read('email') ?? '';
-    String savedPassword = box.read('password') ?? '';
+    if (inputEmail.isEmpty || inputPassword.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Email dan password tidak boleh kosong')),
+      );
+      return;
+    }
+
+    String? savedEmail = box.read('email');
+    String? savedPassword = box.read('password');
+
+    // Tambahan: cek apakah belum ada akun
+    if (savedEmail == null || savedPassword == null) {
+      showDialog(
+        context: context,
+        builder: (_) => AlertDialog(
+          title: const Text('Login Gagal'),
+          content: const Text('Belum ada akun terdaftar.\nSilakan registrasi.'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('BATAL'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                _navigateToRegister();
+              },
+              child: const Text('REGISTER'),
+            ),
+          ],
+        ),
+      );
+      return;
+    }
 
     if (inputEmail == savedEmail && inputPassword == savedPassword) {
       showDialog(
@@ -47,7 +78,7 @@ class _LoginState extends State<Login> {
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop();
-                box.write('sudah_login', true);
+                box.write('sudah_login', true); // simpan status login
                 Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(builder: (context) => const Dashboard()),
@@ -97,10 +128,7 @@ class _LoginState extends State<Login> {
               children: [
                 const Text(
                   'SILAHKAN MELAKUKAN LOGIN',
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 30),
                 _buildInputField(
@@ -134,8 +162,7 @@ class _LoginState extends State<Login> {
                 const SizedBox(height: 30),
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 40, vertical: 14),
+                    padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 14),
                     backgroundColor: Colors.grey.shade300,
                     elevation: 4,
                     shape: RoundedRectangleBorder(
