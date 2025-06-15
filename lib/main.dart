@@ -6,6 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:catatan_dartsquad/Login.dart';
+import 'package:catatan_dartsquad/Register.dart';
 
 void main() async {
   await GetStorage.init();
@@ -26,7 +28,7 @@ class MyApp extends StatelessWidget {
         ),
         useMaterial3: true,
       ),
-      home: Dashboard(),
+      home: Login(),
     );
   }
 }

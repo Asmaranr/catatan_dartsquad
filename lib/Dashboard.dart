@@ -130,7 +130,7 @@ class _DashboardState extends State<Dashboard> {
                   icon: Icon(Icons.person,
                       color: isDark ? Colors.white : Colors.black),
                   onPressed: () {
-                    Get.to(() => const Profil()); // <- Navigasi ke Profil
+                    Get.to(() => const Profil());
                   },
                 ),
               ],
