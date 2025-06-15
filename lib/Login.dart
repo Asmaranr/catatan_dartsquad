@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get_storage/get_storage.dart';
 
 class Login extends StatefulWidget {
   const Login({super.key});
@@ -8,21 +9,212 @@ class Login extends StatefulWidget {
 }
 
 class _LoginState extends State<Login> {
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
+
+  final box = GetStorage(); // GetStorage instance
+  bool _obscurePassword = true;
+
+  void _navigateToRegister() {
+    Navigator.pushNamed(context, '/register');
+  }
+
+  void _togglePasswordVisibility() {
+    setState(() {
+      _obscurePassword = !_obscurePassword;
+    });
+  }
+
+  void _login() {
+    String inputEmail = emailController.text.trim();
+    String inputPassword = passwordController.text;
+
+    String savedEmail = box.read('email') ?? '';
+    String savedPassword = box.read('password') ?? '';
+
+    if (inputEmail == savedEmail && inputPassword == savedPassword) {
+      // Login berhasil
+      showDialog(
+        context: context,
+        builder: (_) => AlertDialog(
+          title: const Text('Login Berhasil'),
+          content: const Text('Selamat, Anda berhasil login!'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+
+                final box = GetStorage();
+                box.write('sudah_login', true);
+                Navigator.pushNamed(context, '/dashboard'); // atau Get.to(...)
+              },
+              child: const Text('OKE'),
+            ),
+          ],
+        ),
+      );
+    }
+
+    if (inputEmail == savedEmail && inputPassword == savedPassword) {
+      // Login berhasil
+      showDialog(
+        context: context,
+        builder: (_) => AlertDialog(
+          title: const Text('Login Berhasil'),
+          content: const Text('Selamat, Anda berhasil login!'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                // Navigasi ke halaman lain jika perlu
+              },
+              child: const Text('OKE'),
+            ),
+          ],
+        ),
+      );
+    } else {
+      // Login gagal
+      showDialog(
+        context: context,
+        builder: (_) => AlertDialog(
+          title: const Text('Login Gagal'),
+          content: const Text(
+              'Email atau password salah.\nSilakan lakukan registrasi terlebih dahulu.'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('BATAL'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                _navigateToRegister();
+              },
+              child: const Text('REGISTER'),
+            ),
+          ],
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
       body: Center(
-        child: Column(
-          children: [
-            Text(
-              'Silahkan Melakukan Login',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 32.0),
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 400),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                const Text(
+                  'SILAHKAN MELAKUKAN LOGIN',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 30),
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade200,
+                    borderRadius: BorderRadius.circular(20),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.grey.shade400,
+                        blurRadius: 4,
+                        offset: const Offset(2, 4),
+                      )
+                    ],
+                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: TextField(
+                    controller: emailController,
+                    decoration: const InputDecoration(
+                      border: InputBorder.none,
+                      labelText: 'Email :',
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade200,
+                    borderRadius: BorderRadius.circular(20),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.grey.shade400,
+                        blurRadius: 4,
+                        offset: const Offset(2, 4),
+                      ),
+                    ],
+                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: TextField(
+                    controller: passwordController,
+                    obscureText: _obscurePassword,
+                    decoration: InputDecoration(
+                      border: InputBorder.none,
+                      labelText: 'Password :',
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          _obscurePassword
+                              ? Icons.visibility_off
+                              : Icons.visibility,
+                          color: Colors.grey,
+                        ),
+                        onPressed: _togglePasswordVisibility,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 10),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Text('Belum memiliki akun? '),
+                    GestureDetector(
+                      onTap: _navigateToRegister,
+                      child: const Text(
+                        'Register',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black,
+                          decoration: TextDecoration.underline,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 30),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 40, vertical: 14),
+                    backgroundColor: Colors.grey.shade300,
+                    elevation: 4,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(15),
+                    ),
+                  ),
+                  onPressed: _login, // <- FIXED: tombol login memanggil _login
+                  child: const Text(
+                    'LOGIN',
+                    style: TextStyle(
+                      color: Colors.black,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
+                  ),
+                ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );
