@@ -191,7 +191,7 @@ class _ProfilState extends State<Profil> {
     return TextField(
       controller: controller,
       obscureText: obscure,
-      readOnly: true, // <-- Supaya tidak bisa diketik
+      readOnly: true, 
       style: TextStyle(color: textColor),
       decoration: InputDecoration(
         hintText: hint,
@@ -217,7 +217,7 @@ class _ProfilState extends State<Profil> {
           controller: controller,
           obscureText: isVisible,
           obscuringCharacter: '*',
-          readOnly: true, // <-- Supaya password tidak bisa diketik langsung
+          readOnly: true, 
           style: TextStyle(color: textColor),
           decoration: InputDecoration(
             hintText: hint,
@@ -232,7 +232,7 @@ class _ProfilState extends State<Profil> {
             ),
             suffixIcon: IconButton(
               icon: Icon(
-                isVisible ? Icons.visibility : Icons.visibility_off,
+                isVisible ? Icons.visibility_off : Icons.visibility,
                 color: textColor,
               ),
               onPressed: () {
