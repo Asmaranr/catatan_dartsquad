@@ -47,7 +47,6 @@ class _ProfilState extends State<Profil> {
     _emailController.text = box.read('email') ?? '';
     _passwordController.text = box.read('password') ?? '';
 
-    // Dengarkan perubahan tema dan update UI
     box.listenKey('temaGelap', (value) {
       setState(() {});
     });
@@ -92,13 +91,16 @@ class _ProfilState extends State<Profil> {
                   : null,
             ),
             const SizedBox(height: 30),
-            _buildTextField("Nama Pengguna", _namaController, fieldColor, textColor),
+            _buildTextField(
+                "Nama Pengguna", _namaController, fieldColor, textColor),
             const SizedBox(height: 15),
-            _buildTextField("Jenis Kelamin", _jenisKelaminController, fieldColor, textColor),
+            _buildTextField("Jenis Kelamin", _jenisKelaminController,
+                fieldColor, textColor),
             const SizedBox(height: 15),
             _buildTextField("Email", _emailController, fieldColor, textColor),
             const SizedBox(height: 15),
-            _buildPasswordField("Password", _passwordController, fieldColor, textColor),
+            _buildPasswordField(
+                "Password", _passwordController, fieldColor, textColor),
             const SizedBox(height: 30),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -107,26 +109,31 @@ class _ProfilState extends State<Profil> {
                   final konfirmasi = await showDialog<bool>(
                     context: context,
                     builder: (context) => AlertDialog(
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-                      title: const Text("Yakin ingin logout?", style: TextStyle(fontWeight: FontWeight.bold)),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(15)),
+                      title: const Text("Yakin ingin logout?",
+                          style: TextStyle(fontWeight: FontWeight.bold)),
                       content: const Text("Kamu akan keluar dari akun ini."),
-                      actionsPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      actionsPadding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 8),
                       actionsAlignment: MainAxisAlignment.end,
                       actions: [
                         TextButton(
                           onPressed: () => Navigator.pop(context, false),
-                          child: const Text("Tidak", style: TextStyle(color: Colors.black)),
+                          child: const Text("Tidak",
+                              style: TextStyle(color: Colors.black)),
                         ),
                         TextButton(
                           onPressed: () => Navigator.pop(context, true),
-                          child: const Text("Yakin", style: TextStyle(color: Colors.red)),
+                          child: const Text("Yakin",
+                              style: TextStyle(color: Colors.red)),
                         ),
                       ],
                     ),
                   );
 
                   if (konfirmasi == true) {
-                    box.erase(); // Hapus semua data
+                    box.erase();
                     Navigator.pushAndRemoveUntil(
                       context,
                       MaterialPageRoute(builder: (_) => const SplashScreen()),
@@ -149,15 +156,20 @@ class _ProfilState extends State<Profil> {
 
                   if (hasil != null && hasil is Map<String, String>) {
                     setState(() {
-                      _namaController.text = hasil['nama'] ?? _namaController.text;
-                      _jenisKelaminController.text = hasil['jenisKelamin'] ?? _jenisKelaminController.text;
-                      _emailController.text = hasil['email'] ?? _emailController.text;
-                      _passwordController.text = hasil['password'] ?? _passwordController.text;
+                      _namaController.text =
+                          hasil['nama'] ?? _namaController.text;
+                      _jenisKelaminController.text =
+                          hasil['jenisKelamin'] ?? _jenisKelaminController.text;
+                      _emailController.text =
+                          hasil['email'] ?? _emailController.text;
+                      _passwordController.text =
+                          hasil['password'] ?? _passwordController.text;
 
                       if (kIsWeb) {
                         final encodedImage = box.read(keyWebFoto);
                         if (encodedImage != null && encodedImage is List) {
-                          _webImage = Uint8List.fromList(encodedImage.cast<int>());
+                          _webImage =
+                              Uint8List.fromList(encodedImage.cast<int>());
                         }
                       } else {
                         _gambarPath = box.read<String>(keyFoto);
@@ -173,18 +185,21 @@ class _ProfilState extends State<Profil> {
     );
   }
 
-  Widget _buildTextField(String hint, TextEditingController controller, Color fillColor, Color textColor,
+  Widget _buildTextField(String hint, TextEditingController controller,
+      Color fillColor, Color textColor,
       {bool obscure = false}) {
     return TextField(
       controller: controller,
       obscureText: obscure,
+      readOnly: true, // <-- Supaya tidak bisa diketik
       style: TextStyle(color: textColor),
       decoration: InputDecoration(
         hintText: hint,
         hintStyle: TextStyle(color: textColor.withOpacity(0.6)),
         filled: true,
         fillColor: fillColor,
-        contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 15),
+        contentPadding:
+            const EdgeInsets.symmetric(vertical: 12, horizontal: 15),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(25),
           borderSide: BorderSide.none,
@@ -193,7 +208,8 @@ class _ProfilState extends State<Profil> {
     );
   }
 
-  Widget _buildPasswordField(String hint, TextEditingController controller, Color fillColor, Color textColor) {
+  Widget _buildPasswordField(String hint, TextEditingController controller,
+      Color fillColor, Color textColor) {
     return ValueListenableBuilder<bool>(
       valueListenable: _passwordVisible,
       builder: (context, isVisible, child) {
@@ -201,13 +217,15 @@ class _ProfilState extends State<Profil> {
           controller: controller,
           obscureText: isVisible,
           obscuringCharacter: '*',
+          readOnly: true, // <-- Supaya password tidak bisa diketik langsung
           style: TextStyle(color: textColor),
           decoration: InputDecoration(
             hintText: hint,
             hintStyle: TextStyle(color: textColor.withOpacity(0.6)),
             filled: true,
             fillColor: fillColor,
-            contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 15),
+            contentPadding:
+                const EdgeInsets.symmetric(vertical: 12, horizontal: 15),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(25),
               borderSide: BorderSide.none,
@@ -227,7 +245,8 @@ class _ProfilState extends State<Profil> {
     );
   }
 
-  Widget _buildButton(String label, Color textColor, Color backgroundColor, VoidCallback onPressed) {
+  Widget _buildButton(String label, Color textColor, Color backgroundColor,
+      VoidCallback onPressed) {
     return ElevatedButton(
       onPressed: onPressed,
       style: ElevatedButton.styleFrom(
