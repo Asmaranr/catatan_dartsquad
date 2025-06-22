@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:get_storage/get_storage.dart';
 import 'Register.dart';
 import 'Dashboard.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+
+final supabase = Supabase.instance.client;
 
 class Login extends StatefulWidget {
   const Login({super.key});
@@ -29,55 +32,49 @@ class _LoginState extends State<Login> {
     });
   }
 
-  void _login() {
-    String inputEmail = emailController.text.trim();
-    String inputPassword = passwordController.text;
+  void _login() async {
+    final email = emailController.text.trim();
+    final password = passwordController.text.trim();
 
-    if (inputEmail.isEmpty || inputPassword.isEmpty) {
+    if (email.isEmpty || password.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Email dan password tidak boleh kosong')),
       );
       return;
     }
 
-    String? savedEmail = box.read('email');
-    String? savedPassword = box.read('password');
-
-    if (savedEmail == null || savedPassword == null) {
-      showDialog(
-        context: context,
-        builder: (_) => AlertDialog(
-          title: const Text('Login Gagal'),
-          content: const Text('Belum ada akun terdaftar.\nSilakan registrasi.'),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('BATAL'),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-                _navigateToRegister();
-              },
-              child: const Text('REGISTER'),
-            ),
-          ],
-        ),
+    try {
+      final response = await supabase.auth.signInWithPassword(
+        email: email,
+        password: password,
       );
-      return;
-    }
 
-    if (inputEmail == savedEmail && inputPassword == savedPassword) {
+      if (response.user == null) {
+        throw 'Login gagal: akun tidak ditemukan';
+      }
+
+      // Ambil data tambahan dari tabel 'user' (jika kamu punya data tambahan di sana)
+      final userDetail = await supabase
+          .from('user')
+          .select()
+          .eq('id', response.user!.id)
+          .maybeSingle();
+
+      // Simpan ke local storage
+      box.write('sudah_login', true);
+      box.write('email', email);
+      box.write('nama', userDetail?['nama'] ?? '');
+      box.write('jenisKelamin', userDetail?['jenis_kelamin'] ?? '');
+
       showDialog(
         context: context,
         builder: (_) => AlertDialog(
           title: const Text('Login Berhasil'),
-          content: const Text('Selamat, Anda berhasil login!'),
+          content: Text('Selamat datang, ${userDetail?['nama'] ?? 'User'}!'),
           actions: [
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop();
-                box.write('sudah_login', true);
                 Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(builder: (context) => const Dashboard()),
@@ -88,27 +85,13 @@ class _LoginState extends State<Login> {
           ],
         ),
       );
-    } else {
-      showDialog(
-        context: context,
-        builder: (_) => AlertDialog(
-          title: const Text('Login Gagal'),
-          content: const Text(
-              'Email atau password salah.\nSilakan lakukan registrasi terlebih dahulu.'),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('BATAL'),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-                _navigateToRegister();
-              },
-              child: const Text('REGISTER'),
-            ),
-          ],
-        ),
+    } on AuthException catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Login gagal: ${e.message}')),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Terjadi kesalahan: $e')),
       );
     }
   }
