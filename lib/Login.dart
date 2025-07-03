@@ -44,6 +44,7 @@ class _LoginState extends State<Login> {
     }
 
     try {
+      // Proses login dengan Supabase Auth
       final response = await supabase.auth.signInWithPassword(
         email: email,
         password: password,
@@ -53,24 +54,31 @@ class _LoginState extends State<Login> {
         throw 'Login gagal: akun tidak ditemukan';
       }
 
-      // Ambil data tambahan dari tabel 'user' (jika kamu punya data tambahan di sana)
+      // Ambil data tambahan dari tabel user (berdasarkan id user)
+      final userId = response.user!.id;
       final userDetail = await supabase
           .from('user')
           .select()
-          .eq('id', response.user!.id)
+          .eq('id', userId)
           .maybeSingle();
 
-      // Simpan ke local storage
+      if (userDetail == null) {
+        throw 'Data user tidak ditemukan di tabel "user"';
+      }
+
+      // Simpan semua data ke local storage
       box.write('sudah_login', true);
       box.write('email', email);
-      box.write('nama', userDetail?['nama'] ?? '');
-      box.write('jenisKelamin', userDetail?['jenis_kelamin'] ?? '');
+      box.write('nama', userDetail['nama'] ?? '');
+      box.write('jenisKelamin', userDetail['jenis_kelamin'] ?? '');
+      box.write('password', userDetail['password'] ?? ''); // password dari tabel user
 
+      // Tampilkan dialog sukses
       showDialog(
         context: context,
         builder: (_) => AlertDialog(
           title: const Text('Login Berhasil'),
-          content: Text('Selamat datang, ${userDetail?['nama'] ?? 'User'}!'),
+          content: Text('Selamat datang, ${userDetail['nama'] ?? 'User'}!'),
           actions: [
             TextButton(
               onPressed: () {

@@ -18,7 +18,6 @@ class _ProfilState extends State<Profil> {
   final TextEditingController _jenisKelaminController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  final ValueNotifier<bool> _passwordVisible = ValueNotifier<bool>(true);
   final box = GetStorage();
 
   Uint8List? _webImage;
@@ -27,12 +26,17 @@ class _ProfilState extends State<Profil> {
   final String keyFoto = 'pathFotoProfil';
   final String keyWebFoto = 'webFotoProfil';
 
-  bool get temaGelap => box.read('temaGelap') ?? false;
+  final String moonImageUrl =
+      'https://marketplace.canva.com/EAFcl9m0Qvo/1/0/900w/canva-gray-cat-on-the-moon-aesthetic-phone-wallpaper-BPptqpeJSC8.jpg';
 
   @override
   void initState() {
     super.initState();
+    _loadData();
+    box.listenKey('temaAktif', (value) => setState(() {}));
+  }
 
+  void _loadData() {
     if (kIsWeb) {
       final encodedImage = box.read(keyWebFoto);
       if (encodedImage != null && encodedImage is List) {
@@ -45,11 +49,8 @@ class _ProfilState extends State<Profil> {
     _namaController.text = box.read('nama') ?? '';
     _jenisKelaminController.text = box.read('jenisKelamin') ?? '';
     _emailController.text = box.read('email') ?? '';
-    _passwordController.text = box.read('password') ?? '';
-
-    box.listenKey('temaGelap', (value) {
-      setState(() {});
-    });
+    final password = box.read('password') ?? '';
+    _passwordController.text = password.isNotEmpty ? '*' * password.length : '(belum diatur)';
   }
 
   ImageProvider? _getBackgroundImage() {
@@ -63,202 +64,185 @@ class _ProfilState extends State<Profil> {
 
   @override
   Widget build(BuildContext context) {
-    Color backgroundColor = temaGelap ? Colors.black : Colors.white;
-    Color textColor = temaGelap ? Colors.white : Colors.black;
-    Color fieldColor = temaGelap ? Colors.grey.shade800 : Colors.grey.shade200;
+    final temaAktif = box.read('temaAktif') ?? 'terang';
+    final isGelap = temaAktif == 'gelap';
+    final isMoon = temaAktif == 'moon';
+
+    final backgroundColor = isMoon ? Colors.transparent : (isGelap ? Colors.black : Colors.white);
+    final textColor = (isGelap || isMoon) ? Colors.white : Colors.black;
+    final fieldColor = isMoon
+        ? Colors.black.withOpacity(0.4)
+        : (isGelap ? Colors.grey.shade800 : Colors.grey.shade200);
+    final hintColor = (isGelap || isMoon) ? Colors.white60 : Colors.black54;
 
     return Scaffold(
       backgroundColor: backgroundColor,
-      appBar: AppBar(
-        title: Text("PROFIL", style: TextStyle(color: textColor)),
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: textColor),
-          onPressed: () => Navigator.pop(context),
-        ),
-        backgroundColor: backgroundColor,
-        elevation: 0,
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          children: [
-            CircleAvatar(
-              radius: 50,
-              backgroundColor: temaGelap ? Colors.grey.shade700 : Colors.grey,
-              backgroundImage: _getBackgroundImage(),
-              child: _webImage == null && _gambarPath == null
-                  ? Icon(Icons.person, size: 50, color: textColor)
-                  : null,
+      body: Stack(
+        children: [
+          if (isMoon)
+            Positioned.fill(
+              child: Image.network(moonImageUrl, fit: BoxFit.cover),
             ),
-            const SizedBox(height: 30),
-            _buildTextField(
-                "Nama Pengguna", _namaController, fieldColor, textColor),
-            const SizedBox(height: 15),
-            _buildTextField("Jenis Kelamin", _jenisKelaminController,
-                fieldColor, textColor),
-            const SizedBox(height: 15),
-            _buildTextField("Email", _emailController, fieldColor, textColor),
-            const SizedBox(height: 15),
-            _buildPasswordField(
-                "Password", _passwordController, fieldColor, textColor),
-            const SizedBox(height: 30),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                _buildButton("Logout", textColor, fieldColor, () async {
-                  final konfirmasi = await showDialog<bool>(
-                    context: context,
-                    builder: (context) => AlertDialog(
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(15)),
-                      title: const Text("Yakin ingin logout?",
-                          style: TextStyle(fontWeight: FontWeight.bold)),
-                      content: const Text("Kamu akan keluar dari akun ini."),
-                      actionsPadding: const EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 8),
-                      actionsAlignment: MainAxisAlignment.end,
-                      actions: [
-                        TextButton(
-                          onPressed: () => Navigator.pop(context, false),
-                          child: const Text("Tidak",
-                              style: TextStyle(color: Colors.black)),
+          SafeArea(
+            child: Center(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(20),
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 600),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      AppBar(
+                        title: Text("PROFIL", style: TextStyle(color: textColor)),
+                        leading: IconButton(
+                          icon: Icon(Icons.arrow_back, color: textColor),
+                          onPressed: () => Navigator.pop(context),
                         ),
-                        TextButton(
-                          onPressed: () => Navigator.pop(context, true),
-                          child: const Text("Yakin",
-                              style: TextStyle(color: Colors.red)),
-                        ),
-                      ],
-                    ),
-                  );
-
-                  if (konfirmasi == true) {
-                    box.erase();
-                    Navigator.pushAndRemoveUntil(
-                      context,
-                      MaterialPageRoute(builder: (_) => const SplashScreen()),
-                      (route) => false,
-                    );
-                  }
-                }),
-                _buildButton("Edit", textColor, fieldColor, () async {
-                  final hasil = await Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => Edit(
-                        nama: _namaController.text,
-                        jenisKelamin: _jenisKelaminController.text,
-                        email: _emailController.text,
-                        password: _passwordController.text,
+                        backgroundColor: backgroundColor,
+                        elevation: 0,
                       ),
-                    ),
-                  );
-
-                  if (hasil != null && hasil is Map<String, String>) {
-                    setState(() {
-                      _namaController.text =
-                          hasil['nama'] ?? _namaController.text;
-                      _jenisKelaminController.text =
-                          hasil['jenisKelamin'] ?? _jenisKelaminController.text;
-                      _emailController.text =
-                          hasil['email'] ?? _emailController.text;
-                      _passwordController.text =
-                          hasil['password'] ?? _passwordController.text;
-
-                      if (kIsWeb) {
-                        final encodedImage = box.read(keyWebFoto);
-                        if (encodedImage != null && encodedImage is List) {
-                          _webImage =
-                              Uint8List.fromList(encodedImage.cast<int>());
-                        }
-                      } else {
-                        _gambarPath = box.read<String>(keyFoto);
-                      }
-                    });
-                  }
-                }),
-              ],
+                      const SizedBox(height: 35),
+                      CircleAvatar(
+                        radius: 50,
+                        backgroundColor: fieldColor,
+                        backgroundImage: _getBackgroundImage(),
+                        child: _getBackgroundImage() == null
+                            ? Icon(Icons.person, size: 50, color: textColor)
+                            : null,
+                      ),
+                      const SizedBox(height: 65),
+                      _buildTextField("Nama Pengguna", _namaController, fieldColor, textColor, hintColor),
+                      const SizedBox(height: 15),
+                      _buildTextField("Jenis Kelamin", _jenisKelaminController, fieldColor, textColor, hintColor),
+                      const SizedBox(height: 15),
+                      _buildTextField("Email", _emailController, fieldColor, textColor, hintColor),
+                      const SizedBox(height: 15),
+                      _buildTextField("Password", _passwordController, fieldColor, textColor, hintColor),
+                      const SizedBox(height: 30),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          ElevatedButton(
+                            onPressed: _konfirmasiLogout,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: fieldColor,
+                              foregroundColor: textColor,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                            ),
+                            child: const Padding(
+                              padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                              child: Text("Logout", style: TextStyle(fontWeight: FontWeight.bold)),
+                            ),
+                          ),
+                          const SizedBox(width: 20),
+                          ElevatedButton(
+                            onPressed: _editData,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: fieldColor,
+                              foregroundColor: textColor,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                            ),
+                            child: const Padding(
+                              padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                              child: Text("Edit", style: TextStyle(fontWeight: FontWeight.bold)),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
 
-  Widget _buildTextField(String hint, TextEditingController controller,
-      Color fillColor, Color textColor,
-      {bool obscure = false}) {
+  Future<void> _konfirmasiLogout() async {
+    final konfirmasi = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+        title: const Text("Yakin ingin logout?", style: TextStyle(fontWeight: FontWeight.bold)),
+        content: const Text("Kamu akan keluar dari akun ini."),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text("Tidak", style: TextStyle(color: Colors.black)),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text("Yakin", style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+
+    if (konfirmasi == true) {
+      box.remove('sudah_login');
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (_) => const SplashScreen()),
+        (route) => false,
+      );
+    }
+  }
+
+  Future<void> _editData() async {
+    final hasil = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => Edit(
+          nama: _namaController.text,
+          jenisKelamin: _jenisKelaminController.text,
+          email: _emailController.text,
+          password: box.read('password') ?? '',
+        ),
+      ),
+    );
+
+    if (hasil != null && hasil is Map<String, String>) {
+      setState(() {
+        _namaController.text = hasil['nama'] ?? _namaController.text;
+        _jenisKelaminController.text = hasil['jenisKelamin'] ?? _jenisKelaminController.text;
+        _emailController.text = hasil['email'] ?? _emailController.text;
+        final pw = hasil['password'] ?? '';
+        _passwordController.text = pw.isNotEmpty ? '*' * pw.length : '(belum diatur)';
+
+        if (kIsWeb) {
+          final encodedImage = box.read(keyWebFoto);
+          if (encodedImage != null && encodedImage is List) {
+            _webImage = Uint8List.fromList(encodedImage.cast<int>());
+          }
+        } else {
+          _gambarPath = box.read<String>(keyFoto);
+        }
+      });
+    }
+  }
+
+  Widget _buildTextField(String hint, TextEditingController controller, Color fillColor, Color textColor, Color hintColor) {
     return TextField(
       controller: controller,
-      obscureText: obscure,
-      readOnly: true, 
+      readOnly: true,
       style: TextStyle(color: textColor),
       decoration: InputDecoration(
         hintText: hint,
-        hintStyle: TextStyle(color: textColor.withOpacity(0.6)),
+        hintStyle: TextStyle(color: hintColor),
         filled: true,
         fillColor: fillColor,
-        contentPadding:
-            const EdgeInsets.symmetric(vertical: 12, horizontal: 15),
+        contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 15),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(25),
           borderSide: BorderSide.none,
         ),
       ),
-    );
-  }
-
-  Widget _buildPasswordField(String hint, TextEditingController controller,
-      Color fillColor, Color textColor) {
-    return ValueListenableBuilder<bool>(
-      valueListenable: _passwordVisible,
-      builder: (context, isVisible, child) {
-        return TextField(
-          controller: controller,
-          obscureText: isVisible,
-          obscuringCharacter: '*',
-          readOnly: true, 
-          style: TextStyle(color: textColor),
-          decoration: InputDecoration(
-            hintText: hint,
-            hintStyle: TextStyle(color: textColor.withOpacity(0.6)),
-            filled: true,
-            fillColor: fillColor,
-            contentPadding:
-                const EdgeInsets.symmetric(vertical: 12, horizontal: 15),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(25),
-              borderSide: BorderSide.none,
-            ),
-            suffixIcon: IconButton(
-              icon: Icon(
-                isVisible ? Icons.visibility_off : Icons.visibility,
-                color: textColor,
-              ),
-              onPressed: () {
-                _passwordVisible.value = !isVisible;
-              },
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildButton(String label, Color textColor, Color backgroundColor,
-      VoidCallback onPressed) {
-    return ElevatedButton(
-      onPressed: onPressed,
-      style: ElevatedButton.styleFrom(
-        backgroundColor: backgroundColor,
-        foregroundColor: textColor,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
-        ),
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-        elevation: 3,
-      ),
-      child: Text(label, style: const TextStyle(fontWeight: FontWeight.bold)),
     );
   }
 }
