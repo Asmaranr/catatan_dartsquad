@@ -44,17 +44,18 @@ class _RegisterState extends State<Register> {
 
         // ✅ 2. Simpan data tambahan ke tabel 'user'
         await supabase.from('user').insert({
-          'id': user.id, // Ambil ID dari hasil signUp Supabase Auth
+          'id': user.id,
           'nama': nama,
           'jenis_kelamin': selectedJK,
           'email': email,
-          // ⚠️ Hindari menyimpan password plaintext di produksi
+          'password': password, // ⬅️ Password ikut disimpan
         });
 
-        // ✅ 3. Simpan lokal (opsional)
+        // ✅ 3. Simpan data lokal untuk halaman profil
         box.write('email', email);
         box.write('nama', nama);
         box.write('jenisKelamin', selectedJK);
+        box.write('password', password); // ⬅️ Penting
 
         showDialog(
           context: context,
@@ -66,8 +67,8 @@ class _RegisterState extends State<Register> {
             actions: [
               TextButton(
                 onPressed: () {
-                  Navigator.of(context).pop();
-                  Navigator.of(context).pop(); // Kembali ke halaman login
+                  Navigator.of(context).pop(); // tutup dialog
+                  Navigator.of(context).pop(); // kembali ke login
                 },
                 child: const Text("OKE"),
               ),
