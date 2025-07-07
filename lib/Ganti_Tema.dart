@@ -31,8 +31,9 @@ class _GantiTemaState extends State<GantiTema> {
   final String moonImageUrl =
       'https://marketplace.canva.com/EAFcl9m0Qvo/1/0/900w/canva-gray-cat-on-the-moon-aesthetic-phone-wallpaper-BPptqpeJSC8.jpg';
 
+  // Ganti gambar tema view jadi ocean
   final String viewImageUrl =
-      'https://id.pngtree.com/freebackground/fresh-summer-simple-green-summer_944760.html';
+      'https://images.pexels.com/photos/5326990/pexels-photo-5326990.jpeg?_gl=1*qtkczw*_ga*MTM3MDI5MjIwMC4xNzUxODc1ODA2*_ga_8JE65Q40S6*czE3NTE4NzU4MDUkbzEkZzEkdDE3NTE4NzY1NjEkajU5JGwwJGgw';
 
   @override
   Widget build(BuildContext context) {
@@ -41,7 +42,7 @@ class _GantiTemaState extends State<GantiTema> {
           (isMoon || isView) ? null : (isGelap ? Colors.black : Colors.white),
       body: Stack(
         children: [
-          // Background image untuk tema Moon dan View
+          // Background image untuk tema Moon dan Ocean (dulu View)
           if (isMoon || isView)
             Positioned.fill(
               child: Image.network(
@@ -103,10 +104,11 @@ class _GantiTemaState extends State<GantiTema> {
                       onTap: () => setTema('moon'),
                     ),
                     _buildTemaCard(
-                      label: 'Tema View',
+                      label:
+                          'Tema Ocean', // Label sudah diganti dari 'View' ke 'Ocean'
                       imageUrl: viewImageUrl,
                       isSelected: isView,
-                      onTap: () => setTema('view'),
+                      onTap: () => setTema('view'), // tetap key 'view'
                     ),
                   ],
                 ),

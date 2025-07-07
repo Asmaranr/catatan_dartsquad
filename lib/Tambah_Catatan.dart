@@ -27,7 +27,8 @@ class _TambahCatatanState extends State<TambahCatatan> {
 
   final String moonImageUrl =
       'https://marketplace.canva.com/EAFcl9m0Qvo/1/0/900w/canva-gray-cat-on-the-moon-aesthetic-phone-wallpaper-BPptqpeJSC8.jpg';
-  final String viewImageUrl = 'https://i.imgur.com/LmBcX3W.jpeg';
+  final String viewImageUrl =
+      'https://images.pexels.com/photos/5326990/pexels-photo-5326990.jpeg?_gl=1*qtkczw*_ga*MTM3MDI5MjIwMC4xNzUxODc1ODA2*_ga_8JE65Q40S6*czE3NTE4NzU4MDUkbzEkZzEkdDE3NTE4NzY1NjEkajU5JGwwJGg';
 
   @override
   void initState() {
