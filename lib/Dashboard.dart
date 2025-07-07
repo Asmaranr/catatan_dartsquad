@@ -14,13 +14,16 @@ class Dashboard extends StatefulWidget {
   State<Dashboard> createState() => _DashboardState();
 }
 
-class _DashboardState extends State<Dashboard> with SingleTickerProviderStateMixin {
+class _DashboardState extends State<Dashboard>
+    with SingleTickerProviderStateMixin {
   final TextEditingController _searchController = TextEditingController();
   final box = GetStorage();
   List<Map<String, dynamic>> daftarCatatan = [];
   Set<String> selectedIds = {};
+
   final String moonImageUrl =
       'https://marketplace.canva.com/EAFcl9m0Qvo/1/0/900w/canva-gray-cat-on-the-moon-aesthetic-phone-wallpaper-BPptqpeJSC8.jpg';
+  final String viewImageUrl = 'https://i.imgur.com/LmBcX3W.jpeg';
 
   late AnimationController _controller;
   late Animation<double> _scaleAnimation;
@@ -78,10 +81,15 @@ class _DashboardState extends State<Dashboard> with SingleTickerProviderStateMix
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Konfirmasi'),
-        content: const Text('Apakah Anda yakin ingin menghapus catatan terpilih?'),
+        content:
+            const Text('Apakah Anda yakin ingin menghapus catatan terpilih?'),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Batal')),
-          TextButton(onPressed: () => Navigator.pop(context, true), child: const Text('Hapus')),
+          TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('Batal')),
+          TextButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: const Text('Hapus')),
         ],
       ),
     );
@@ -98,16 +106,16 @@ class _DashboardState extends State<Dashboard> with SingleTickerProviderStateMix
   Future<void> sematkanTerpilih() async {
     await Supabase.instance.client
         .from('catatan')
-        .update({'disematkan': true})
-        .inFilter('id', selectedIds.map((e) => e.toString()).toList());
+        .update({'disematkan': true}).inFilter(
+            'id', selectedIds.map((e) => e.toString()).toList());
     await _ambilCatatan();
   }
 
   Future<void> unpinTerpilih() async {
     await Supabase.instance.client
         .from('catatan')
-        .update({'disematkan': false})
-        .inFilter('id', selectedIds.map((e) => e.toString()).toList());
+        .update({'disematkan': false}).inFilter(
+            'id', selectedIds.map((e) => e.toString()).toList());
     await _ambilCatatan();
   }
 
@@ -134,18 +142,21 @@ class _DashboardState extends State<Dashboard> with SingleTickerProviderStateMix
     final bool isTerang = temaAktif == 'terang';
     final bool isGelap = temaAktif == 'gelap';
     final bool isMoon = temaAktif == 'moon';
+    final bool isView = temaAktif == 'view';
 
-    final backgroundColor = isMoon
-        ? null
-        : (isGelap ? Colors.black : Colors.white);
+    final backgroundColor =
+        (isMoon || isView) ? null : (isGelap ? Colors.black : Colors.white);
 
-    final textColor = (isGelap || isMoon) ? Colors.white : Colors.black;
-    final secondaryTextColor = (isGelap || isMoon) ? Colors.white70 : Colors.black87;
-    final hintColor = (isGelap || isMoon) ? Colors.white54 : Colors.black54;
-    final cardColor = isMoon
+    final textColor =
+        (isGelap || isMoon || isView) ? Colors.white : Colors.black;
+    final secondaryTextColor =
+        (isGelap || isMoon || isView) ? Colors.white70 : Colors.black87;
+    final hintColor =
+        (isGelap || isMoon || isView) ? Colors.white54 : Colors.black54;
+    final cardColor = (isMoon || isView)
         ? Colors.black.withOpacity(0.4)
         : (isGelap ? Colors.grey[800] : Colors.grey[200]);
-    final selectedCardColor = isMoon
+    final selectedCardColor = (isMoon || isView)
         ? Colors.blueGrey.withOpacity(0.6)
         : (isGelap ? Colors.blueGrey : Colors.blue[100]);
 
@@ -153,11 +164,14 @@ class _DashboardState extends State<Dashboard> with SingleTickerProviderStateMix
       backgroundColor: backgroundColor,
       body: Stack(
         children: [
-          if (isMoon)
+          if (isMoon || isView)
             Positioned.fill(
               child: Image.network(
-                moonImageUrl,
+                isMoon ? moonImageUrl : viewImageUrl,
                 fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) {
+                  return const Center(child: Text('Gagal memuat gambar'));
+                },
               ),
             ),
           SafeArea(
@@ -170,7 +184,7 @@ class _DashboardState extends State<Dashboard> with SingleTickerProviderStateMix
                     height: 40,
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     decoration: BoxDecoration(
-                      color: isMoon
+                      color: (isMoon || isView)
                           ? Colors.black.withOpacity(0.4)
                           : (isGelap ? Colors.grey[800] : Colors.grey[200]),
                       borderRadius: BorderRadius.circular(20),
@@ -210,11 +224,13 @@ class _DashboardState extends State<Dashboard> with SingleTickerProviderStateMix
                         Row(
                           children: [
                             IconButton(
-                              icon: const Icon(Icons.push_pin, color: Colors.orange),
+                              icon: const Icon(Icons.push_pin,
+                                  color: Colors.orange),
                               onPressed: sematkanTerpilih,
                             ),
                             IconButton(
-                              icon: const Icon(Icons.push_pin_outlined, color: Colors.blueGrey),
+                              icon: const Icon(Icons.push_pin_outlined,
+                                  color: Colors.blueGrey),
                               onPressed: unpinTerpilih,
                             ),
                             IconButton(
@@ -223,7 +239,8 @@ class _DashboardState extends State<Dashboard> with SingleTickerProviderStateMix
                             ),
                             IconButton(
                               icon: const Icon(Icons.close, color: Colors.grey),
-                              onPressed: () => setState(() => selectedIds.clear()),
+                              onPressed: () =>
+                                  setState(() => selectedIds.clear()),
                             ),
                           ],
                         )
@@ -274,7 +291,8 @@ class _DashboardState extends State<Dashboard> with SingleTickerProviderStateMix
                 daftarCatatan.isEmpty
                     ? const Expanded(
                         child: Center(
-                          child: Text('Belum ada catatan', style: TextStyle(color: Colors.grey)),
+                          child: Text('Belum ada catatan',
+                              style: TextStyle(color: Colors.grey)),
                         ),
                       )
                     : Expanded(
@@ -285,13 +303,17 @@ class _DashboardState extends State<Dashboard> with SingleTickerProviderStateMix
                             final id = catatan['id'].toString();
                             final isSelected = selectedIds.contains(id);
                             final isPinned = catatan['disematkan'] == true;
-                            final createdAt = DateTime.parse(catatan['created_at']).toLocal();
-                            final tanggal = DateFormat('dd MMM yyyy, HH:mm', 'id_ID').format(createdAt);
+                            final createdAt =
+                                DateTime.parse(catatan['created_at']).toLocal();
+                            final tanggal =
+                                DateFormat('dd MMM yyyy, HH:mm', 'id_ID')
+                                    .format(createdAt);
 
                             return GestureDetector(
                               onTap: () async {
                                 if (selectedIds.isEmpty) {
-                                  await Get.to(() => TambahCatatan(catatan: catatan));
+                                  await Get.to(
+                                      () => TambahCatatan(catatan: catatan));
                                   await _ambilCatatan();
                                 } else {
                                   toggleSelect(id);
@@ -299,10 +321,13 @@ class _DashboardState extends State<Dashboard> with SingleTickerProviderStateMix
                               },
                               onDoubleTap: () => toggleSelect(id),
                               child: Container(
-                                margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                                margin: const EdgeInsets.symmetric(
+                                    horizontal: 20, vertical: 8),
                                 padding: const EdgeInsets.all(16),
                                 decoration: BoxDecoration(
-                                  color: isSelected ? selectedCardColor : cardColor,
+                                  color: isSelected
+                                      ? selectedCardColor
+                                      : cardColor,
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                                 child: Column(
@@ -320,7 +345,8 @@ class _DashboardState extends State<Dashboard> with SingleTickerProviderStateMix
                                           ),
                                         ),
                                         if (isPinned)
-                                          const Icon(Icons.push_pin, size: 16, color: Colors.orange),
+                                          const Icon(Icons.push_pin,
+                                              size: 16, color: Colors.orange),
                                       ],
                                     ),
                                     const SizedBox(height: 6),
@@ -328,14 +354,16 @@ class _DashboardState extends State<Dashboard> with SingleTickerProviderStateMix
                                       catatan['isi'] ?? '',
                                       maxLines: 2,
                                       overflow: TextOverflow.ellipsis,
-                                      style: TextStyle(color: secondaryTextColor),
+                                      style:
+                                          TextStyle(color: secondaryTextColor),
                                     ),
                                     const SizedBox(height: 6),
                                     Align(
                                       alignment: Alignment.bottomRight,
                                       child: Text(
                                         tanggal,
-                                        style: TextStyle(fontSize: 11, color: hintColor),
+                                        style: TextStyle(
+                                            fontSize: 11, color: hintColor),
                                       ),
                                     ),
                                   ],
@@ -358,7 +386,8 @@ class _DashboardState extends State<Dashboard> with SingleTickerProviderStateMix
                         },
                       ),
                       IconButton(
-                        icon: Icon(Icons.add_circle, size: 48, color: textColor),
+                        icon:
+                            Icon(Icons.add_circle, size: 48, color: textColor),
                         onPressed: () async {
                           await Get.to(() => const TambahCatatan());
                           await _ambilCatatan();

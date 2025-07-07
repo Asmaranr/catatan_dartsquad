@@ -23,24 +23,29 @@ class _GantiTemaState extends State<GantiTema> {
   bool get isTerang => temaAktif == 'terang';
   bool get isGelap => temaAktif == 'gelap';
   bool get isMoon => temaAktif == 'moon';
+  bool get isView => temaAktif == 'view';
 
   Color get textColor =>
-      isGelap || isMoon ? Colors.white : Colors.black;
+      isGelap || isMoon || isView ? Colors.white : Colors.black;
 
   final String moonImageUrl =
       'https://marketplace.canva.com/EAFcl9m0Qvo/1/0/900w/canva-gray-cat-on-the-moon-aesthetic-phone-wallpaper-BPptqpeJSC8.jpg';
 
+  final String viewImageUrl =
+      'https://id.pngtree.com/freebackground/fresh-summer-simple-green-summer_944760.html';
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: isMoon ? null : (isGelap ? Colors.black : Colors.white),
+      backgroundColor:
+          (isMoon || isView) ? null : (isGelap ? Colors.black : Colors.white),
       body: Stack(
         children: [
-          // Background Moon Image
-          if (isMoon)
+          // Background image untuk tema Moon dan View
+          if (isMoon || isView)
             Positioned.fill(
               child: Image.network(
-                moonImageUrl,
+                isMoon ? moonImageUrl : viewImageUrl,
                 fit: BoxFit.cover,
                 errorBuilder: (context, error, stackTrace) {
                   return const Center(child: Text('Gagal memuat gambar'));
@@ -53,7 +58,7 @@ class _GantiTemaState extends State<GantiTema> {
             child: Column(
               children: [
                 AppBar(
-                  backgroundColor: isMoon
+                  backgroundColor: (isMoon || isView)
                       ? Colors.transparent
                       : (isGelap ? Colors.black : Colors.white),
                   elevation: 0,
@@ -96,6 +101,12 @@ class _GantiTemaState extends State<GantiTema> {
                       imageUrl: moonImageUrl,
                       isSelected: isMoon,
                       onTap: () => setTema('moon'),
+                    ),
+                    _buildTemaCard(
+                      label: 'Tema View',
+                      imageUrl: viewImageUrl,
+                      isSelected: isView,
+                      onTap: () => setTema('view'),
                     ),
                   ],
                 ),

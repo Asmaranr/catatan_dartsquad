@@ -28,6 +28,7 @@ class _ProfilState extends State<Profil> {
 
   final String moonImageUrl =
       'https://marketplace.canva.com/EAFcl9m0Qvo/1/0/900w/canva-gray-cat-on-the-moon-aesthetic-phone-wallpaper-BPptqpeJSC8.jpg';
+  final String viewImageUrl = 'https://i.imgur.com/LmBcX3W.jpeg';
 
   @override
   void initState() {
@@ -50,7 +51,8 @@ class _ProfilState extends State<Profil> {
     _jenisKelaminController.text = box.read('jenisKelamin') ?? '';
     _emailController.text = box.read('email') ?? '';
     final password = box.read('password') ?? '';
-    _passwordController.text = password.isNotEmpty ? '*' * password.length : '(belum diatur)';
+    _passwordController.text =
+        password.isNotEmpty ? '*' * password.length : '(belum diatur)';
   }
 
   ImageProvider? _getBackgroundImage() {
@@ -67,21 +69,29 @@ class _ProfilState extends State<Profil> {
     final temaAktif = box.read('temaAktif') ?? 'terang';
     final isGelap = temaAktif == 'gelap';
     final isMoon = temaAktif == 'moon';
+    final isView = temaAktif == 'view';
 
-    final backgroundColor = isMoon ? Colors.transparent : (isGelap ? Colors.black : Colors.white);
-    final textColor = (isGelap || isMoon) ? Colors.white : Colors.black;
-    final fieldColor = isMoon
+    final backgroundColor = (isMoon || isView)
+        ? Colors.transparent
+        : (isGelap ? Colors.black : Colors.white);
+    final textColor =
+        (isGelap || isMoon || isView) ? Colors.white : Colors.black;
+    final fieldColor = (isMoon || isView)
         ? Colors.black.withOpacity(0.4)
         : (isGelap ? Colors.grey.shade800 : Colors.grey.shade200);
-    final hintColor = (isGelap || isMoon) ? Colors.white60 : Colors.black54;
+    final hintColor =
+        (isGelap || isMoon || isView) ? Colors.white60 : Colors.black54;
 
     return Scaffold(
       backgroundColor: backgroundColor,
       body: Stack(
         children: [
-          if (isMoon)
+          if (isMoon || isView)
             Positioned.fill(
-              child: Image.network(moonImageUrl, fit: BoxFit.cover),
+              child: Image.network(
+                isMoon ? moonImageUrl : viewImageUrl,
+                fit: BoxFit.cover,
+              ),
             ),
           SafeArea(
             child: Center(
@@ -93,7 +103,8 @@ class _ProfilState extends State<Profil> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       AppBar(
-                        title: Text("PROFIL", style: TextStyle(color: textColor)),
+                        title:
+                            Text("PROFIL", style: TextStyle(color: textColor)),
                         leading: IconButton(
                           icon: Icon(Icons.arrow_back, color: textColor),
                           onPressed: () => Navigator.pop(context),
@@ -111,13 +122,17 @@ class _ProfilState extends State<Profil> {
                             : null,
                       ),
                       const SizedBox(height: 65),
-                      _buildTextField("Nama Pengguna", _namaController, fieldColor, textColor, hintColor),
+                      _buildTextField("Nama Pengguna", _namaController,
+                          fieldColor, textColor, hintColor),
                       const SizedBox(height: 15),
-                      _buildTextField("Jenis Kelamin", _jenisKelaminController, fieldColor, textColor, hintColor),
+                      _buildTextField("Jenis Kelamin", _jenisKelaminController,
+                          fieldColor, textColor, hintColor),
                       const SizedBox(height: 15),
-                      _buildTextField("Email", _emailController, fieldColor, textColor, hintColor),
+                      _buildTextField("Email", _emailController, fieldColor,
+                          textColor, hintColor),
                       const SizedBox(height: 15),
-                      _buildTextField("Password", _passwordController, fieldColor, textColor, hintColor),
+                      _buildTextField("Password", _passwordController,
+                          fieldColor, textColor, hintColor),
                       const SizedBox(height: 30),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -132,8 +147,11 @@ class _ProfilState extends State<Profil> {
                               ),
                             ),
                             child: const Padding(
-                              padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                              child: Text("Logout", style: TextStyle(fontWeight: FontWeight.bold)),
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: 20, vertical: 12),
+                              child: Text("Logout",
+                                  style:
+                                      TextStyle(fontWeight: FontWeight.bold)),
                             ),
                           ),
                           const SizedBox(width: 20),
@@ -147,8 +165,11 @@ class _ProfilState extends State<Profil> {
                               ),
                             ),
                             child: const Padding(
-                              padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                              child: Text("Edit", style: TextStyle(fontWeight: FontWeight.bold)),
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: 20, vertical: 12),
+                              child: Text("Edit",
+                                  style:
+                                      TextStyle(fontWeight: FontWeight.bold)),
                             ),
                           ),
                         ],
@@ -169,7 +190,8 @@ class _ProfilState extends State<Profil> {
       context: context,
       builder: (context) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-        title: const Text("Yakin ingin logout?", style: TextStyle(fontWeight: FontWeight.bold)),
+        title: const Text("Yakin ingin logout?",
+            style: TextStyle(fontWeight: FontWeight.bold)),
         content: const Text("Kamu akan keluar dari akun ini."),
         actions: [
           TextButton(
@@ -210,10 +232,12 @@ class _ProfilState extends State<Profil> {
     if (hasil != null && hasil is Map<String, String>) {
       setState(() {
         _namaController.text = hasil['nama'] ?? _namaController.text;
-        _jenisKelaminController.text = hasil['jenisKelamin'] ?? _jenisKelaminController.text;
+        _jenisKelaminController.text =
+            hasil['jenisKelamin'] ?? _jenisKelaminController.text;
         _emailController.text = hasil['email'] ?? _emailController.text;
         final pw = hasil['password'] ?? '';
-        _passwordController.text = pw.isNotEmpty ? '*' * pw.length : '(belum diatur)';
+        _passwordController.text =
+            pw.isNotEmpty ? '*' * pw.length : '(belum diatur)';
 
         if (kIsWeb) {
           final encodedImage = box.read(keyWebFoto);
@@ -227,7 +251,8 @@ class _ProfilState extends State<Profil> {
     }
   }
 
-  Widget _buildTextField(String hint, TextEditingController controller, Color fillColor, Color textColor, Color hintColor) {
+  Widget _buildTextField(String hint, TextEditingController controller,
+      Color fillColor, Color textColor, Color hintColor) {
     return TextField(
       controller: controller,
       readOnly: true,
@@ -237,7 +262,8 @@ class _ProfilState extends State<Profil> {
         hintStyle: TextStyle(color: hintColor),
         filled: true,
         fillColor: fillColor,
-        contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 15),
+        contentPadding:
+            const EdgeInsets.symmetric(vertical: 12, horizontal: 15),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(25),
           borderSide: BorderSide.none,

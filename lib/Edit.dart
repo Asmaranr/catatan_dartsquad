@@ -45,6 +45,7 @@ class _EditState extends State<Edit> {
 
   final String moonImageUrl =
       'https://marketplace.canva.com/EAFcl9m0Qvo/1/0/900w/canva-gray-cat-on-the-moon-aesthetic-phone-wallpaper-BPptqpeJSC8.jpg';
+  final String viewImageUrl = 'https://i.imgur.com/LmBcX3W.jpeg';
 
   @override
   void initState() {
@@ -147,23 +148,27 @@ class _EditState extends State<Edit> {
     final bool isTerang = temaAktif == 'terang';
     final bool isGelap = temaAktif == 'gelap';
     final bool isMoon = temaAktif == 'moon';
+    final bool isView = temaAktif == 'view';
 
-    final backgroundColor =
-        isMoon ? Colors.transparent : (isGelap ? Colors.black : Colors.white);
-    final textColor = (isGelap || isMoon) ? Colors.white : Colors.black;
-    final fieldColor = isMoon
+    final backgroundColor = (isMoon || isView)
+        ? Colors.transparent
+        : (isGelap ? Colors.black : Colors.white);
+    final textColor =
+        (isGelap || isMoon || isView) ? Colors.white : Colors.black;
+    final fieldColor = (isMoon || isView)
         ? Colors.black.withOpacity(0.4)
         : (isGelap ? Colors.grey.shade800 : Colors.grey.shade200);
-    final hintColor = (isGelap || isMoon) ? Colors.white60 : Colors.black54;
+    final hintColor =
+        (isGelap || isMoon || isView) ? Colors.white60 : Colors.black54;
 
     return Scaffold(
       backgroundColor: backgroundColor,
       body: Stack(
         children: [
-          if (isMoon)
+          if (isMoon || isView)
             Positioned.fill(
               child: Image.network(
-                moonImageUrl,
+                isMoon ? moonImageUrl : viewImageUrl,
                 fit: BoxFit.cover,
               ),
             ),
@@ -183,7 +188,8 @@ class _EditState extends State<Edit> {
                           icon: Icon(Icons.arrow_back, color: textColor),
                           onPressed: () => Navigator.pop(context),
                         ),
-                        title: Text("EDIT PROFIL", style: TextStyle(color: textColor)),
+                        title: Text("EDIT PROFIL",
+                            style: TextStyle(color: textColor)),
                       ),
                       const SizedBox(height: 35),
                       Stack(
@@ -205,20 +211,25 @@ class _EditState extends State<Edit> {
                               child: CircleAvatar(
                                 backgroundColor: Colors.blue,
                                 radius: 18,
-                                child: Icon(Icons.edit, size: 18, color: Colors.white),
+                                child: Icon(Icons.edit,
+                                    size: 18, color: Colors.white),
                               ),
                             ),
                           ),
                         ],
                       ),
                       const SizedBox(height: 65),
-                      _buildTextField("Nama Pengguna", _namaController, fieldColor, textColor, hintColor),
+                      _buildTextField("Nama Pengguna", _namaController,
+                          fieldColor, textColor, hintColor),
                       const SizedBox(height: 15),
-                      _buildDropdownJenisKelamin(fieldColor, textColor, hintColor),
+                      _buildDropdownJenisKelamin(
+                          fieldColor, textColor, hintColor),
                       const SizedBox(height: 15),
-                      _buildTextField("Email", _emailController, fieldColor, textColor, hintColor),
+                      _buildTextField("Email", _emailController, fieldColor,
+                          textColor, hintColor),
                       const SizedBox(height: 15),
-                      _buildPasswordField("Password", _passwordController, fieldColor, textColor, hintColor),
+                      _buildPasswordField("Password", _passwordController,
+                          fieldColor, textColor, hintColor),
                       const SizedBox(height: 30),
                       ElevatedButton(
                         onPressed: _simpanData,
@@ -230,9 +241,11 @@ class _EditState extends State<Edit> {
                           ),
                         ),
                         child: const Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                          padding: EdgeInsets.symmetric(
+                              horizontal: 20, vertical: 12),
                           child: Text("Simpan",
-                              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold, fontSize: 16)),
                         ),
                       ),
                     ],
@@ -246,7 +259,8 @@ class _EditState extends State<Edit> {
     );
   }
 
-  Widget _buildTextField(String hint, TextEditingController controller, Color fillColor, Color textColor, Color hintColor,
+  Widget _buildTextField(String hint, TextEditingController controller,
+      Color fillColor, Color textColor, Color hintColor,
       {bool obscure = false}) {
     return TextField(
       controller: controller,
@@ -257,7 +271,8 @@ class _EditState extends State<Edit> {
         hintStyle: TextStyle(color: hintColor, fontSize: 16),
         filled: true,
         fillColor: fillColor,
-        contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 15),
+        contentPadding:
+            const EdgeInsets.symmetric(vertical: 12, horizontal: 15),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(25),
           borderSide: BorderSide.none,
@@ -266,7 +281,8 @@ class _EditState extends State<Edit> {
     );
   }
 
-  Widget _buildPasswordField(String hint, TextEditingController controller, Color fillColor, Color textColor, Color hintColor) {
+  Widget _buildPasswordField(String hint, TextEditingController controller,
+      Color fillColor, Color textColor, Color hintColor) {
     return TextField(
       controller: controller,
       obscureText: !_passwordVisible,
@@ -277,7 +293,8 @@ class _EditState extends State<Edit> {
         hintStyle: TextStyle(color: hintColor, fontSize: 16),
         filled: true,
         fillColor: fillColor,
-        contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 15),
+        contentPadding:
+            const EdgeInsets.symmetric(vertical: 12, horizontal: 15),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(25),
           borderSide: BorderSide.none,
@@ -298,9 +315,12 @@ class _EditState extends State<Edit> {
     );
   }
 
-  Widget _buildDropdownJenisKelamin(Color fillColor, Color textColor, Color hintColor) {
+  Widget _buildDropdownJenisKelamin(
+      Color fillColor, Color textColor, Color hintColor) {
     return DropdownButtonFormField<String>(
-      value: _jenisKelaminController.text.isNotEmpty ? _jenisKelaminController.text : null,
+      value: _jenisKelaminController.text.isNotEmpty
+          ? _jenisKelaminController.text
+          : null,
       items: ['Laki-laki', 'Perempuan'].map((String value) {
         return DropdownMenuItem<String>(
           value: value,
@@ -317,7 +337,8 @@ class _EditState extends State<Edit> {
         hintStyle: TextStyle(color: hintColor, fontSize: 16),
         filled: true,
         fillColor: fillColor,
-        contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 15),
+        contentPadding:
+            const EdgeInsets.symmetric(vertical: 12, horizontal: 15),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(25),
           borderSide: BorderSide.none,

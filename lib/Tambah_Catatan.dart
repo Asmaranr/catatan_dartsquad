@@ -27,6 +27,7 @@ class _TambahCatatanState extends State<TambahCatatan> {
 
   final String moonImageUrl =
       'https://marketplace.canva.com/EAFcl9m0Qvo/1/0/900w/canva-gray-cat-on-the-moon-aesthetic-phone-wallpaper-BPptqpeJSC8.jpg';
+  final String viewImageUrl = 'https://i.imgur.com/LmBcX3W.jpeg';
 
   @override
   void initState() {
@@ -124,12 +125,18 @@ class _TambahCatatanState extends State<TambahCatatan> {
     final bool isTerang = temaAktif == 'terang';
     final bool isGelap = temaAktif == 'gelap';
     final bool isMoon = temaAktif == 'moon';
+    final bool isView = temaAktif == 'view';
 
-    final bgColor = isMoon ? Colors.transparent : (isGelap ? Colors.black : Colors.white);
-    final textColor = (isGelap || isMoon) ? Colors.white : Colors.black;
-    final hintColor = (isGelap || isMoon) ? Colors.white54 : Colors.black54;
+    final bgColor = (isMoon || isView)
+        ? Colors.transparent
+        : (isGelap ? Colors.black : Colors.white);
+    final textColor =
+        (isGelap || isMoon || isView) ? Colors.white : Colors.black;
+    final hintColor =
+        (isGelap || isMoon || isView) ? Colors.white54 : Colors.black54;
     final iconColor = textColor;
-    final inputBgColor = isMoon ? Colors.black.withOpacity(0.4) : Colors.transparent;
+    final inputBgColor =
+        (isMoon || isView) ? Colors.black.withOpacity(0.4) : Colors.transparent;
 
     Widget? imageWidget;
     if (_existingImageUrl != null) {
@@ -144,10 +151,10 @@ class _TambahCatatanState extends State<TambahCatatan> {
       backgroundColor: bgColor,
       body: Stack(
         children: [
-          if (isMoon)
+          if (isMoon || isView)
             Positioned.fill(
               child: Image.network(
-                moonImageUrl,
+                isMoon ? moonImageUrl : viewImageUrl,
                 fit: BoxFit.cover,
               ),
             ),
@@ -177,7 +184,8 @@ class _TambahCatatanState extends State<TambahCatatan> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 12, vertical: 8),
                           decoration: BoxDecoration(
                             color: inputBgColor,
                             borderRadius: BorderRadius.circular(8),
@@ -198,7 +206,8 @@ class _TambahCatatanState extends State<TambahCatatan> {
                         ),
                         const SizedBox(height: 20),
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 12, vertical: 8),
                           decoration: BoxDecoration(
                             color: inputBgColor,
                             borderRadius: BorderRadius.circular(8),
@@ -244,7 +253,8 @@ class _TambahCatatanState extends State<TambahCatatan> {
                                     ),
                                     child: const Padding(
                                       padding: EdgeInsets.all(4.0),
-                                      child: Icon(Icons.close, color: Colors.white, size: 20),
+                                      child: Icon(Icons.close,
+                                          color: Colors.white, size: 20),
                                     ),
                                   ),
                                 ),
@@ -255,7 +265,8 @@ class _TambahCatatanState extends State<TambahCatatan> {
                         Align(
                           alignment: Alignment.bottomRight,
                           child: IconButton(
-                            icon: Icon(Icons.add_photo_alternate, color: iconColor),
+                            icon: Icon(Icons.add_photo_alternate,
+                                color: iconColor),
                             iconSize: 30,
                             onPressed: _pickImage,
                           ),
