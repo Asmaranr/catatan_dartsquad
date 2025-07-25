@@ -3,7 +3,6 @@ import 'package:get_storage/get_storage.dart';
 import 'Register.dart';
 import 'Dashboard.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:google_sign_in/google_sign_in.dart';
 
 final supabase = Supabase.instance.client;
 
@@ -45,6 +44,7 @@ class _LoginState extends State<Login> {
     }
 
     try {
+      // Proses login dengan Supabase Auth
       final response = await supabase.auth.signInWithPassword(
         email: email,
         password: password,
@@ -54,6 +54,7 @@ class _LoginState extends State<Login> {
         throw 'Login gagal: akun tidak ditemukan';
       }
 
+      // Ambil data tambahan dari tabel user (berdasarkan id user)
       final userId = response.user!.id;
       final userDetail =
           await supabase.from('user').select().eq('id', userId).maybeSingle();
@@ -62,12 +63,15 @@ class _LoginState extends State<Login> {
         throw 'Data user tidak ditemukan di tabel "user"';
       }
 
+      // Simpan semua data ke local storage
       box.write('sudah_login', true);
       box.write('email', email);
       box.write('nama', userDetail['nama'] ?? '');
       box.write('jenisKelamin', userDetail['jenis_kelamin'] ?? '');
-      box.write('password', userDetail['password'] ?? '');
+      box.write(
+          'password', userDetail['password'] ?? ''); // password dari tabel user
 
+      // Tampilkan dialog sukses
       showDialog(
         context: context,
         builder: (_) => AlertDialog(
@@ -94,59 +98,6 @@ class _LoginState extends State<Login> {
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Terjadi kesalahan: $e')),
-      );
-    }
-  }
-
-  Future<void> _loginWithGoogle() async {
-    try {
-      final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
-      if (googleUser == null) return;
-
-      final GoogleSignInAuthentication googleAuth =
-          await googleUser.authentication;
-
-      final idToken = googleAuth.idToken;
-      final accessToken = googleAuth.accessToken;
-
-      final response = await supabase.auth.signInWithIdToken(
-        provider: OAuthProvider.google,
-        idToken: idToken!,
-        accessToken: accessToken,
-      );
-
-      final userId = response.user?.id;
-      if (userId == null) throw 'Login gagal: user ID kosong';
-
-      var userDetail =
-          await supabase.from('user').select().eq('id', userId).maybeSingle();
-
-      if (userDetail == null) {
-        await supabase.from('user').insert({
-          'id': userId,
-          'nama': response.user!.userMetadata?['full_name'] ?? '',
-          'email': response.user!.email,
-          'jenis_kelamin': '',
-          'password': '',
-        });
-
-        userDetail =
-            await supabase.from('user').select().eq('id', userId).maybeSingle();
-      }
-
-      box.write('sudah_login', true);
-      box.write('email', response.user!.email);
-      box.write('nama', userDetail?['nama'] ?? '');
-      box.write('jenisKelamin', userDetail?['jenis_kelamin'] ?? '');
-      box.write('password', userDetail?['password'] ?? '');
-
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => const Dashboard()),
-      );
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Login Google gagal: $e')),
       );
     }
   }
@@ -216,32 +167,6 @@ class _LoginState extends State<Login> {
                       fontSize: 16,
                     ),
                   ),
-                ),
-                const SizedBox(height: 16),
-                ElevatedButton.icon(
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 24, vertical: 12),
-                    backgroundColor: Colors.white,
-                    elevation: 2,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(15),
-                      side: const BorderSide(color: Colors.grey),
-                    ),
-                  ),
-                  icon: Image.asset(
-                    'assets/google_logo.png',
-                    height: 24,
-                    width: 24,
-                  ),
-                  label: const Text(
-                    'Login with Google',
-                    style: TextStyle(
-                      color: Colors.black,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  onPressed: _loginWithGoogle,
                 ),
               ],
             ),

@@ -11,7 +11,7 @@ import 'package:catatan_dartsquad/Login.dart';
 import 'package:catatan_dartsquad/Register.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:intl/date_symbol_data_local.dart'; 
+import 'package:intl/date_symbol_data_local.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized(); // Perlu untuk inisialisasi async
